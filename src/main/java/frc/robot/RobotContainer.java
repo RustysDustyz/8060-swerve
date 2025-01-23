@@ -1,8 +1,17 @@
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -33,9 +42,26 @@ public class RobotContainer {
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
 
+    /* ShuffleboardTab Inputs */
+    private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto Trajectory Config");
+    private final GenericEntry startX = autoTab.add("Start X", 0.0).getEntry();
+    private final GenericEntry startY = autoTab.add("Start Y", 0.0).getEntry();
+    private final GenericEntry startTheta = autoTab.add("Start Theta", 0.0).getEntry();
+    private final GenericEntry endX = autoTab.add("End X", 3.0).getEntry();
+    private final GenericEntry endY = autoTab.add("End Y", 0.0).getEntry();
+    private final GenericEntry endTheta = autoTab.add("End Theta", 0.0).getEntry();
+
+     final List<GenericEntry> waypointX = new ArrayList<>();
+    private final List<GenericEntry> waypointY = new ArrayList<>();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        // Add Waypoint Entries to Shuffleboard
+        for (int i = 0; i<5; i++) {
+            waypointX.add(autoTab.add("Waypoint " + (i + 1) + " X", 0.0).getEntry());
+            waypointY.add(autoTab.add("Waypoint " + (i + 1) + " Y", 0.0).getEntry());
+        }
+
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
@@ -68,6 +94,31 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         // An ExampleCommand will run in autonomous
-        return new exampleAuto(s_Swerve);
+
+        // Read Inputs from Shuffleboard
+        Pose2d startPose = new Pose2d(
+            startX.getDouble(0.0),
+            startY.getDouble(0.0),
+            Rotation2d.fromDegrees(startTheta.getDouble(0.0))
+        );
+        Pose2d endPose = new Pose2d(
+            endX.getDouble(3.0),
+            endY.getDouble(0.0),
+            Rotation2d.fromDegrees(endTheta.getDouble(0.0))
+        );
+
+        List<Translation2d> waypoints = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            double x = waypointX.get(i).getDouble(0.0);
+            double y = waypointY.get(i).getDouble(0.0);
+
+            // Add non-zero waypoints to the trajectory
+            if (x != 0.0 || y != 0.0) {
+                waypoints.add(new Translation2d(x, y));
+            }
+        }
+
+        return new exampleAuto(s_Swerve, startPose, endPose, waypoints);
+        // return new exampleAuto(s_Swerve); (HARD CODED TRAJECTORY)
     }
 }
