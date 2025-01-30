@@ -8,10 +8,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -28,7 +30,7 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Controllers */
-    private final Joystick driver = new Joystick(0);
+    private final XboxController driver = new XboxController(0);
 
     /* Drive Controls */
     private final int translationAxis = XboxController.Axis.kLeftY.value;
@@ -42,24 +44,24 @@ public class RobotContainer {
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
 
-    /* ShuffleboardTab Inputs */
-    private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto Trajectory Config");
-    private final GenericEntry startX = autoTab.add("Start X", 0.0).getEntry();
-    private final GenericEntry startY = autoTab.add("Start Y", 0.0).getEntry();
-    private final GenericEntry startTheta = autoTab.add("Start Theta", 0.0).getEntry();
-    private final GenericEntry endX = autoTab.add("End X", 3.0).getEntry();
-    private final GenericEntry endY = autoTab.add("End Y", 0.0).getEntry();
-    private final GenericEntry endTheta = autoTab.add("End Theta", 0.0).getEntry();
-
-     final List<GenericEntry> waypointX = new ArrayList<>();
-    private final List<GenericEntry> waypointY = new ArrayList<>();
+    /* Shuffleboard */
+    //private final ShuffleboardTab tab = Shuffleboard.getTab("Auto");
+    //private final GenericEntry placeholder = tab.add("Placeholder",1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        // Add Waypoint Entries to Shuffleboard
+        // SmartDashboard Inputs
+        SmartDashboard.putNumber("startX", 0.5);
+        SmartDashboard.putNumber("startY", 0.5);
+        SmartDashboard.putNumber("startTheta", 0.0);
+        SmartDashboard.putNumber("endX", 1.0);
+        SmartDashboard.putNumber("endY", 1.0);
+        SmartDashboard.putNumber("endTheta", 0.0);
+        
+        // Add Waypoint Entries to SmartDashboard
         for (int i = 0; i<5; i++) {
-            waypointX.add(autoTab.add("Waypoint " + (i + 1) + " X", 0.0).getEntry());
-            waypointY.add(autoTab.add("Waypoint " + (i + 1) + " Y", 0.0).getEntry());
+            SmartDashboard.putNumber("waypointX-%d".formatted(i), 0.0);
+            SmartDashboard.putNumber("waypointY-%d".formatted(i), 0.0);
         }
 
         s_Swerve.setDefaultCommand(
@@ -96,21 +98,34 @@ public class RobotContainer {
         // An ExampleCommand will run in autonomous
 
         // Read Inputs from Shuffleboard
+        SmartDashboard.updateValues();
+
         Pose2d startPose = new Pose2d(
-            startX.getDouble(0.0),
-            startY.getDouble(0.0),
-            Rotation2d.fromDegrees(startTheta.getDouble(0.0))
+            SmartDashboard.getNumber("startX", 0.5),
+            SmartDashboard.getNumber("startY", 0.5),
+            Rotation2d.fromDegrees(SmartDashboard.getNumber("startTheta", 0.0))
         );
         Pose2d endPose = new Pose2d(
-            endX.getDouble(3.0),
-            endY.getDouble(0.0),
-            Rotation2d.fromDegrees(endTheta.getDouble(0.0))
+            SmartDashboard.getNumber("endX", 1.0),
+            SmartDashboard.getNumber("endY", 1.0),
+            Rotation2d.fromDegrees(SmartDashboard.getNumber("endTheta", 0.0))
         );
+        System.out.print("start: ");
+        System.out.println(startPose);
+        System.out.print("end: ");
+        System.out.println(endPose);
+
+        // Program is prone to crash if start/end are too close in the path.
+        // If that is true, the program will return a null command instead.
+        if(startPose.getTranslation().getDistance(endPose.getTranslation()) < 0.01) return null;
 
         List<Translation2d> waypoints = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            double x = waypointX.get(i).getDouble(0.0);
-            double y = waypointY.get(i).getDouble(0.0);
+            double x = SmartDashboard.getNumber("waypointX-%d".formatted(i), 0.0);
+            double y = SmartDashboard.getNumber("waypointY-%d".formatted(i), 0.0);
+
+            System.out.printf("w[%d]: ",i);
+            System.out.printf("Translation2d(X: %.2f, Y: %.2f)\n",x,y);
 
             // Add non-zero waypoints to the trajectory
             if (x != 0.0 || y != 0.0) {
