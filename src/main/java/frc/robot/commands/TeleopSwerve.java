@@ -46,11 +46,13 @@ public class TeleopSwerve extends Command {
         strafeVal = strafeLimiter.calculate(strafeVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
         rotationVal = rotationLimiter.calculate(rotationVal) * Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared;
 
-        System.out.println(strafeVal);
+        rotationVal = 0;
+
+        //System.out.printf("t:%.3f, s:%.3f, r:%.3f\n",translationVal,strafeVal,rotationVal);
 
         /* Drive */
         s_Swerve.drive(
-            new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed), 
+            new Translation2d(-strafeVal, translationVal).times(Constants.Swerve.maxSpeed), 
             rotationVal * Constants.Swerve.maxAngularVelocity, 
             !robotCentricSup.getAsBoolean(), 
             true

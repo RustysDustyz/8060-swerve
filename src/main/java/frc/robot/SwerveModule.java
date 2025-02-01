@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -29,6 +30,7 @@ public class SwerveModule {
 
     /* angle motor control requests */
     private final PositionVoltage anglePosition = new PositionVoltage(0);
+    private final PIDController turningPidController;
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
@@ -37,6 +39,9 @@ public class SwerveModule {
         /* Angle Encoder Config */
         angleEncoder = new CANcoder(moduleConstants.cancoderID);
         angleEncoder.getConfigurator().apply(Robot.ctreConfigs.swerveCANcoderConfig);
+
+        turningPidController = new PIDController(0.5, 0, 0);
+        turningPidController.enableContinuousInput(-Math.PI, Math.PI);
 
         /* Angle Motor Config */
         mAngleMotor = new TalonFX(moduleConstants.angleMotorID);
@@ -50,12 +55,22 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
-        desiredState = SwerveModuleState.optimize(desiredState, getState().angle); 
-        mAngleMotor.setControl(anglePosition.withPosition(desiredState.angle.getRotations()));
+        if(angleEncoder.getDeviceID() == 4) System.out.printf("pre-op: %s\n",desiredState.toString());
+        //desiredState.optimize(getState().angle);
+        if(angleEncoder.getDeviceID() == 4) System.out.printf("post-op: %s\n",desiredState.toString());
+        //desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
+        //PositionVoltage pv = anglePosition.withPosition(desiredState.angle.getRotations());
+        //System.out.printf("[%d]: pos: %.4f\n",angleEncoder.getDeviceID(),pv.Position);
+        //mAngleMotor.setControl(pv);
+        mAngleMotor.set(turningPidController.calculate(
+            mAngleMotor.getPosition().getValueAsDouble(),
+            desiredState.angle.getRotations() + Constants.Swerve.globalModuleAngleOffset.getRotations()
+        ));
         setSpeed(desiredState, isOpenLoop);
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
+        //System.out.println(desiredState);
         if(isOpenLoop){
             driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
             mDriveMotor.setControl(driveDutyCycle);
