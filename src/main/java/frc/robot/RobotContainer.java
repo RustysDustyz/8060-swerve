@@ -84,8 +84,13 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
-
-
+        new JoystickButton(driver, 11).onTrue(
+            new InstantCommand(() -> {
+               for(SwerveModule mod : s_Swerve.mSwerveMods){
+                mod.resetOptimization();
+               } 
+            })
+        );
     }
 
     /**
