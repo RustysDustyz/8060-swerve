@@ -16,7 +16,10 @@ import frc.lib.util.SwerveModuleConstants;
 
 public class SwerveModule {
     public int moduleNumber;
+
     private Rotation2d angleOffset;
+    private SwerveModuleState lastDesiredState;
+    private double loopOffset = 0;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
@@ -32,6 +35,21 @@ public class SwerveModule {
     private final PositionVoltage anglePosition = new PositionVoltage(0);
     private final PIDController turningPidController;
 
+    private void optimize(SwerveModuleState desiredState){
+        if(lastDesiredState == null){
+            lastDesiredState = desiredState;
+            return;
+        }
+        double delta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
+
+        if(Math.abs(delta) > 180){
+            loopOffset -= Math.signum(delta);
+        }
+
+        lastDesiredState = desiredState;
+        desiredState.angle = desiredState.angle.rotateBy(Rotation2d.kPi.times(loopOffset*2));
+    }
+
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
         this.angleOffset = moduleConstants.angleOffset;
@@ -41,7 +59,7 @@ public class SwerveModule {
         angleEncoder.getConfigurator().apply(Robot.ctreConfigs.swerveCANcoderConfig);
 
         turningPidController = new PIDController(0.5, 0, 0);
-        turningPidController.enableContinuousInput(-Math.PI, Math.PI);
+        turningPidController.enableContinuousInput(Math.PI, Math.PI);
 
         /* Angle Motor Config */
         mAngleMotor = new TalonFX(moduleConstants.angleMotorID);
@@ -55,17 +73,16 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
-        if(angleEncoder.getDeviceID() == 4) System.out.printf("pre-op: %s\n",desiredState.toString());
-        //desiredState.optimize(getState().angle);
-        if(angleEncoder.getDeviceID() == 4) System.out.printf("post-op: %s\n",desiredState.toString());
-        //desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
-        //PositionVoltage pv = anglePosition.withPosition(desiredState.angle.getRotations());
-        //System.out.printf("[%d]: pos: %.4f\n",angleEncoder.getDeviceID(),pv.Position);
-        //mAngleMotor.setControl(pv);
+        optimize(desiredState);
+
+        //System.out.printf("angle: %.3f\n",optimized.angle.getDegrees());
+        
         mAngleMotor.set(turningPidController.calculate(
             mAngleMotor.getPosition().getValueAsDouble(),
-            desiredState.angle.getRotations() + Constants.Swerve.globalModuleAngleOffset.getRotations()
+            desiredState.angle.getRotations() + loopOffset //+ Constants.Swerve.globalModuleAngleOffset.getRotations()
         ));
+        
+        //desiredState.speedMetersPerSecond = 0;
         setSpeed(desiredState, isOpenLoop);
     }
 

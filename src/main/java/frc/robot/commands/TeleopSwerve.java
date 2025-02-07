@@ -38,15 +38,13 @@ public class TeleopSwerve extends Command {
     @Override
     public void execute() {
         /* Get Values, Deadband*/
-        double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband);
-        double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband);
-        double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
+        double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.translationDeadband);
+        double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.translationDeadband);
+        double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.angularDeadband);
 
         translationVal = translationLimiter.calculate(translationVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
         strafeVal = strafeLimiter.calculate(strafeVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
         rotationVal = rotationLimiter.calculate(rotationVal) * Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared;
-
-        rotationVal = 0;
 
         //System.out.printf("t:%.3f, s:%.3f, r:%.3f\n",translationVal,strafeVal,rotationVal);
 
