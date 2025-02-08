@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
+    private boolean transMode = false;
+
     public SwerveDriveOdometry swerveOdometry;
     public SwerveModule[] mSwerveMods;
     public ADXRS450_Gyro gyro;
@@ -40,8 +42,13 @@ public class Swerve extends SubsystemBase {
         .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     }
 
+    public void toggleTransMode(){
+        transMode = !transMode;
+    }
+
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
         //System.out.println(translation);
+        if(transMode) rotation = 0;
         SwerveModuleState[] swerveModuleStates =
             Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -57,10 +64,12 @@ public class Swerve extends SubsystemBase {
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
+        System.out.printf("yaw: %.3f\n",getGyroYaw().getDegrees());
+
         for(SwerveModule mod : mSwerveMods){
             
             if(Math.abs(rotation) > 0.001){
-                // fix module 2 and 3
+                // fix module 2 and 3\
                 if(mod.moduleNumber >= 2)
                 swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
                     mod.moduleNumber == 2 ? Rotation2d.kCCW_Pi_2 : Rotation2d.kCW_Pi_2);
@@ -109,7 +118,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getHeading(){
-        return getPose().getRotation();
+        return getPose().getRotation().times(-1);
     }
 
     public void setHeading(Rotation2d heading){

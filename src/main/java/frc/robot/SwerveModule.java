@@ -32,6 +32,7 @@ public class SwerveModule {
     private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
 
     /* angle motor control requests */
+    //TODO: Are we going to use this?
     private final PositionVoltage anglePosition = new PositionVoltage(0);
     private final PIDController turningPidController;
 
@@ -40,10 +41,10 @@ public class SwerveModule {
             lastDesiredState = desiredState;
             return;
         }
-        double delta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
+        double valueDelta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
 
-        if(Math.abs(delta) > 180){
-            loopOffset -= Math.signum(delta);
+        if(Math.abs(valueDelta) > 180){
+            loopOffset -= Math.signum(valueDelta);
         }
 
         lastDesiredState = desiredState;
