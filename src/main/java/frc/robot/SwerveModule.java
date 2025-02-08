@@ -41,6 +41,8 @@ public class SwerveModule {
             return;
         }
         double delta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
+        // would the below work as well? (just want to clean things up)
+        //double delta = desiredState.angle.minus(lastDesiredState.angle).getDegrees();
 
         if(Math.abs(delta) > 180){
             loopOffset -= Math.signum(delta);
