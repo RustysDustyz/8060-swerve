@@ -54,13 +54,6 @@ public class Swerve extends SubsystemBase {
 
         // supposed to fix the angles of mods 2 and 3 when rotating
         for(SwerveModule mod : mSwerveMods){
-            if(mod.moduleNumber >= 2 && Math.abs(rotation) > 0){
-                swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
-                    mod.moduleNumber == 3 ? 
-                    Rotation2d.kCW_Pi_2 : 
-                    Rotation2d.kCCW_Pi_2
-                );
-            }
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
     }    

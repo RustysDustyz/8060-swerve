@@ -14,7 +14,7 @@ import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
     public static final double translationDeadband = 0.1;
-    public static final double angularDeadband = 0.2;
+    public static final double angularDeadband = 0.5;
 
     public static final class Swerve {
         public static final int pigeonID = 1;
