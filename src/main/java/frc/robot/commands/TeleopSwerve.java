@@ -30,9 +30,9 @@ public class TeleopSwerve extends Command {
         this.robotCentricSup = robotCentricSup;
 
         // Initialize slew rate limiters for x, y, and turning speeds
-        this.translationLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-        this.strafeLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-        this.rotationLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared);
+        this.translationLimiter = new SlewRateLimiter(Constants.Swerve.maxAccel);
+        this.strafeLimiter = new SlewRateLimiter(Constants.Swerve.maxAccel);
+        this.rotationLimiter = new SlewRateLimiter(Constants.Swerve.maxAngularAccel);
     }
 
     @Override
@@ -42,9 +42,9 @@ public class TeleopSwerve extends Command {
         double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.translationDeadband);
         double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.angularDeadband);
 
-        translationVal = translationLimiter.calculate(translationVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
-        strafeVal = strafeLimiter.calculate(strafeVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
-        rotationVal = rotationLimiter.calculate(rotationVal) * Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared;
+        translationVal = translationLimiter.calculate(translationVal) * Constants.Swerve.maxAccel;
+        strafeVal = strafeLimiter.calculate(strafeVal) * Constants.Swerve.maxAccel;
+        rotationVal = rotationLimiter.calculate(rotationVal) * Constants.Swerve.maxAngularAccel;
 
         //System.out.printf("t:%.3f, s:%.3f, r:%.3f\n",translationVal,strafeVal,rotationVal);
 
@@ -52,8 +52,8 @@ public class TeleopSwerve extends Command {
         s_Swerve.drive(
             new Translation2d(-strafeVal, translationVal).times(Constants.Swerve.maxSpeed), 
             rotationVal * Constants.Swerve.maxAngularVelocity, 
-            !robotCentricSup.getAsBoolean(), // actually try robot centric with rotation
-            true //try setting to: false//
+            !robotCentricSup.getAsBoolean(), 
+            true
         );
     }
 }

@@ -81,10 +81,12 @@ public final class Constants {
         /* Swerve Profiling Values */
         /** Meters per Second */
         public static final double maxSpeed = 0.5; //TODO: This must be tuned to specific robot
+        public static final double maxAccel = 0.5;
         /** Radians per Second */
         public static final double maxAngularVelocity = 1.0; //TODO: This must be tuned to specific robot
+        public static final double maxAngularAccel = 0.5;
         /* Global angle offset */
-        public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(-90);
+        public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(0);
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
@@ -133,10 +135,10 @@ public final class Constants {
     }
 
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-        public static final double kMaxSpeedMetersPerSecond = 0.5;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 0.5;
-        public static final double kMaxAngularSpeedRadiansPerSecond = 0.5;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.5;
+        public static final double kMaxSpeedMetersPerSecond = 0.2;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 0.2;
+        public static final double kMaxAngularSpeedRadiansPerSecond = 0.2;
+        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.2;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;

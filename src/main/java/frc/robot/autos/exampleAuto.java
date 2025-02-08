@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 public class exampleAuto extends SequentialCommandGroup {
-    //public exampleAuto(Swerve s_Swerve) { (HARD CODED TRAJECTORY)
-    public exampleAuto(Swerve s_Swerve, Pose2d start, Pose2d end, List<Translation2d> waypoints) {
+    public exampleAuto(Swerve s_Swerve) { //(HARD CODED TRAJECTORY)
+    // public exampleAuto(Swerve s_Swerve, Pose2d start, Pose2d end, List<Translation2d> waypoints) {
         TrajectoryConfig config =
             new TrajectoryConfig(
                     Constants.AutoConstants.kMaxSpeedMetersPerSecond,
@@ -30,14 +30,17 @@ public class exampleAuto extends SequentialCommandGroup {
         Trajectory exampleTrajectory =
             TrajectoryGenerator.generateTrajectory(
                 // Start at the origin facing the +X direction
-                // new Pose2d(0, 0, new Rotation2d(0)), (HARD CODED TRAJECTORY)
-                start,
+                new Pose2d(0, 0, new Rotation2d(0)), //(HARD CODED TRAJECTORY)
+                //start,
                 // Pass through the interior waypoints, making an 's' curve path
-                // List.of(new Translation2d(1, 1), new Translation2d(2, -1)), (HARD CODED TRAJECTORY)
-                waypoints,
+                List.of(
+                    //new Translation2d(0.2, 0.2), 
+                    new Translation2d(-0.7, 0.8)
+                ), //(HARD CODED TRAJECTORY)
+                //waypoints,
                 // End 3 meters straight ahead of where we started, facing forward
-                // new Pose2d(3, 0, new Rotation2d(0)), (HARD CODED TRAJECTORY)
-                end,
+                new Pose2d(0,2, new Rotation2d(0)), //(HARD CODED TRAJECTORY)
+                //end,
                 config);
 
         var thetaController =

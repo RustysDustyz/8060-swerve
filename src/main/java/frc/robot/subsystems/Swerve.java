@@ -15,7 +15,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
@@ -23,7 +22,7 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public ADXRS450_Gyro gyro;
 
-    private final StructArrayPublisher<SwerveModuleState> publisher;
+    public final StructArrayPublisher<SwerveModuleState> publisher;
 
     public Swerve() {
         gyro = new ADXRS450_Gyro();
@@ -37,10 +36,8 @@ public class Swerve extends SubsystemBase {
         };
 
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
-
         publisher = NetworkTableInstance.getDefault()
-      .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
-
+        .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -50,18 +47,30 @@ public class Swerve extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    rotation, 
+                                    -rotation, 
                                     getHeading()
                                 )
                                 : new ChassisSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    rotation)
+                                    -rotation)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-        // supposed to fix the angles of mods 2 and 3 when rotating
         for(SwerveModule mod : mSwerveMods){
+            
+            if(Math.abs(rotation) > 0.001){
+                // fix module 2 and 3
+                if(mod.moduleNumber >= 2)
+                swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
+                    mod.moduleNumber == 2 ? Rotation2d.kCCW_Pi_2 : Rotation2d.kCW_Pi_2);
+                
+                // un-global offset for z-axis
+                swerveModuleStates[mod.moduleNumber].angle = 
+                    swerveModuleStates[mod.moduleNumber].angle.rotateBy(Constants.Swerve.globalModuleAngleOffset.times(-1));
+            }
+
+            // set desired state
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
     }    
@@ -124,8 +133,6 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic(){
         swerveOdometry.update(getGyroYaw(), getModulePositions());
-
-        // allows us to visialiuze the swerve states with a recording in adavanteg scores 
         publisher.set(getModuleStates());
 
         /*

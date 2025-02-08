@@ -90,7 +90,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         // An ExampleCommand will run in autonomous
-
+        /*
         // Read Inputs from Shuffleboard
         SmartDashboard.updateValues();
 
@@ -126,8 +126,9 @@ public class RobotContainer {
                 waypoints.add(new Translation2d(x, y));
             }
         }
-
+        
         return new exampleAuto(s_Swerve, startPose, endPose, waypoints);
-        // return new exampleAuto(s_Swerve); (HARD CODED TRAJECTORY)
+        */
+        return new exampleAuto(s_Swerve); //(HARD CODED TRAJECTORY)
     }
 }
