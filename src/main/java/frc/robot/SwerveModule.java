@@ -41,6 +41,8 @@ public class SwerveModule {
             return;
         }
         double delta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
+        // would the below work as well? (just want to clean things up)
+        //double delta = desiredState.angle.minus(lastDesiredState.angle).getDegrees();
 
         if(Math.abs(delta) > 180){
             loopOffset -= Math.signum(delta);
@@ -81,7 +83,11 @@ public class SwerveModule {
             mAngleMotor.getPosition().getValueAsDouble(),
             desiredState.angle.getRotations() + loopOffset //+ Constants.Swerve.globalModuleAngleOffset.getRotations()
         ));
-        
+        /*
+        Cosine compensation is a technique that reduces the speed of a module when it is not pointing in the desired direction. 
+        This is done by multiplying the desired speed of the module by the cosine of the angle error.
+         */
+        desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
         //desiredState.speedMetersPerSecond = 0;
         setSpeed(desiredState, isOpenLoop);
     }
