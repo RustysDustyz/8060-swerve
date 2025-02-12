@@ -84,8 +84,8 @@ public class SwerveModule {
             desiredState.angle.getRotations() + loopOffset + Constants.Swerve.globalModuleAngleOffset.getRotations()
         ));
         
-        //desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
-        //desiredState.speedMetersPerSecond = 0;
+        desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
+        
         setSpeed(desiredState, isOpenLoop);
     }
 
@@ -106,6 +106,10 @@ public class SwerveModule {
         return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
+    public TalonFX getDriveMotor(){
+        return mDriveMotor;
+    }
+
     public void resetToAbsolute(){
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
@@ -123,5 +127,10 @@ public class SwerveModule {
             Conversions.rotationsToMeters(mDriveMotor.getPosition().getValueAsDouble(), Constants.Swerve.wheelCircumference), 
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValueAsDouble())
         );
+    }
+
+    public void setDriveVoltage(double voltage) {
+        driveDutyCycle.Output = voltage;
+        mDriveMotor.setControl(driveDutyCycle);
     }
 }

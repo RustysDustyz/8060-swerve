@@ -34,6 +34,7 @@ public class RobotContainer {
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
     private final JoystickButton translationMode = new JoystickButton(driver, 1);
+    private final JoystickButton sysidMode = new JoystickButton(driver, 2);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 4);
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
 
@@ -84,6 +85,12 @@ public class RobotContainer {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
         translationMode.toggleOnTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
+        sysidMode
+            .and(new JoystickButton(driver, 7))
+            .toggleOnTrue(new InstantCommand(s_Swerve::getDriveDynamTest));
+            sysidMode
+            .and(new JoystickButton(driver, 8))
+            .toggleOnTrue(new InstantCommand(s_Swerve::getDriveQuadTest));
     }
 
     /**

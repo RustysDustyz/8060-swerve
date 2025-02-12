@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.util.SwerveVoltageRequest;
 import frc.robot.Constants;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -8,14 +9,27 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.units.BaseUnits;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class Swerve extends SubsystemBase {
     private boolean transMode = false;
@@ -25,6 +39,32 @@ public class Swerve extends SubsystemBase {
     public ADXRS450_Gyro gyro;
 
     public final StructArrayPublisher<SwerveModuleState> publisher;
+    private final MutVoltage m_appliedVoltage = Volts.mutable(0);
+    private final MutDistance m_distance = Meters.mutable(0);
+    private final MutLinearVelocity m_velocity = MetersPerSecond.mutable(0);
+
+    private SwerveVoltageRequest driveVoltageRequest = new SwerveVoltageRequest(true);
+
+    private SysIdRoutine m_driveSysIdRoutine =
+    new SysIdRoutine(
+        new SysIdRoutine.Config(null, null, null),
+        new SysIdRoutine.Mechanism(
+            (Voltage volts) -> {
+                for (SwerveModule swerveModule : mSwerveMods)
+                swerveModule.setDriveVoltage(volts.in(BaseUnits.VoltageUnit));
+            },
+            (SysIdRoutineLog log) -> {
+                for(SwerveModule mod : mSwerveMods){
+                    log.motor(String.format("mod%d",mod.moduleNumber))
+                    .voltage(m_appliedVoltage.mut_replace(mod.getDriveMotor().get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(mod.getPosition().distanceMeters,Meters))
+                    .linearVelocity(m_velocity.mut_replace(mod.getState().speedMetersPerSecond,MetersPerSecond));
+                }
+            },
+            this
+        ));
+
+    private SwerveVoltageRequest steerVoltageRequest = new SwerveVoltageRequest(false);
 
     public Swerve() {
         gyro = new ADXRS450_Gyro();
@@ -63,8 +103,6 @@ public class Swerve extends SubsystemBase {
                                     -rotation)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
-
-        System.out.printf("yaw: %.3f\n",getGyroYaw().getDegrees());
 
         for(SwerveModule mod : mSwerveMods){
             
@@ -137,6 +175,14 @@ public class Swerve extends SubsystemBase {
         for(SwerveModule mod : mSwerveMods){
             mod.resetToAbsolute();
         }
+    }
+
+    public Command getDriveQuadTest(){
+        return m_driveSysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
+    }
+
+    public Command getDriveDynamTest(){
+        return m_driveSysIdRoutine.dynamic(SysIdRoutine.Direction.kForward);
     }
 
     @Override
