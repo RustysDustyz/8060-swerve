@@ -3,18 +3,19 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctre.phoenix6.SignalLogger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DriverConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -35,18 +36,33 @@ public class RobotContainer {
     private final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
 
     /* Driver Buttons */
-    private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
-    private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
+    // Buttons labelled by numbers on the LogiTech Extreme
+    private final JoystickButton translationMode = new JoystickButton(driver, 1);
+    // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
+    //private final JoystickButton aimAssist = new JoystickButton(driver, 2);
+    private final JoystickButton sysidMode = new JoystickButton(driver, 3);
+    private final JoystickButton featureTestMode = new JoystickButton(driver, 4);
+    private final JoystickButton robotCentric = new JoystickButton(driver, 5);
+    private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
+
+    private final Trigger notInterface = sysidMode.or(featureTestMode).negate();
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
-
-    /* Shuffleboard */
-    //private final ShuffleboardTab tab = Shuffleboard.getTab("Auto");
-    //private final GenericEntry placeholder = tab.add("Placeholder",1).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
+    private SignedMotors s_Elevator;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        /* FIXME: Once you've deleted ElevatorConstants.implemented:
+            1. assign the s_Elevator field to this value.
+            2. set s_Elevator to a private final field.
+            3. fix any other errors that may occur.
+        */
+        if(ElevatorConstants.implemented) new SignedMotors(
+            new Spark(ElevatorConstants.elevatorPosMotorID),
+            new Spark(ElevatorConstants.elevatorNegMotorID)
+        );
+
         // SmartDashboard Inputs
         SmartDashboard.putNumber("startX", 0.5);
         SmartDashboard.putNumber("startY", 0.5);
@@ -56,10 +72,10 @@ public class RobotContainer {
         SmartDashboard.putNumber("endTheta", 0.0);
         
         // Add Waypoint Entries to SmartDashboard
-        for (int i = 0; i<5; i++) {
+        /*for (int i = 0; i<5; i++) {
             SmartDashboard.putNumber("waypointX-%d".formatted(i), 0.0);
             SmartDashboard.putNumber("waypointY-%d".formatted(i), 0.0);
-        }
+        }*/
 
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
@@ -68,6 +84,13 @@ public class RobotContainer {
                 () -> -driver.getRawAxis(strafeAxis), 
                 () -> -driver.getRawAxis(rotationAxis), 
                 () -> robotCentric.getAsBoolean()
+            )
+        );
+        if(ElevatorConstants.implemented) s_Elevator.setDefaultCommand(
+            new ElevatorCommand(
+                s_Elevator, () ->
+                driver.getPOV() == 0 ? 1
+                    : (driver.getPOV() == 180 ? -1 : 0)
             )
         );
 
@@ -83,14 +106,41 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
+
+        // Zero Gyro : Press or hold Btn 6 to reset heading
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
-        new JoystickButton(driver, 11).onTrue(
-            new InstantCommand(() -> {
-               for(SwerveModule mod : s_Swerve.mSwerveMods){
-                mod.resetOptimization();
-               } 
-            })
-        );
+
+        // Translation Mode : Press Btn 1 to toggle
+        translationMode.toggleOnTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
+
+        if(DriverConstants.enableSysID){
+            // Sys ID Dynam Test : Press Btn 3 + 7 to start
+            // Warning: Very fast!
+            sysidMode
+                .and(new JoystickButton(driver, 7))
+                .toggleOnTrue(s_Swerve.getDriveDynamTest());
+            // SYS ID Quad Test : Press Btn 3 + 8 to start
+            // Warnin g: Very fast!
+            sysidMode
+                .and(new JoystickButton(driver, 8))
+                .toggleOnTrue(s_Swerve.getDriveQuadTest());
+        }else{
+            sysidMode.toggleOnTrue(new InstantCommand(() -> System.out.println(
+                "SysID button is disabled. Enable in Constants.DriverConstants.enableSysID"
+            )));
+        }
+
+        if(DriverConstants.enableFeatureTest){
+            // Feature Test - AprilTag Aim Assist : Press Btn 4 + 7 to start
+            featureTestMode
+                .and(new JoystickButton(driver, 7))
+                .toggleOnTrue(new InstantCommand(s_Swerve::ft_aimAssist));
+        }
+
+        // Non-interface buttons
+        new JoystickButton(driver, 7)
+            .and(notInterface)
+            .toggleOnTrue(new InstantCommand(() -> System.out.println("Non interface btn 7 activated")));
     }
 
     /**
@@ -100,7 +150,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         // An ExampleCommand will run in autonomous
-
+        /*
         // Read Inputs from Shuffleboard
         SmartDashboard.updateValues();
 
@@ -136,8 +186,9 @@ public class RobotContainer {
                 waypoints.add(new Translation2d(x, y));
             }
         }
-
+        
         return new exampleAuto(s_Swerve, startPose, endPose, waypoints);
-        // return new exampleAuto(s_Swerve); (HARD CODED TRAJECTORY)
+        */
+        return new exampleAuto(s_Swerve); //(HARD CODED TRAJECTORY)
     }
 }

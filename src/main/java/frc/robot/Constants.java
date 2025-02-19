@@ -13,9 +13,27 @@ import frc.lib.util.COTSTalonFXSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
-    public static final double stickDeadband = 0.1;
+    public static final double translationDeadband = 0.1;
+    public static final double angularDeadband = 0.5;
 
-    public static final class Swerve {
+    public static final class DriverConstants {
+        /**
+         * SysID button is an interface for performing SysID functions;
+         * see {@link RobotContainer.sysidMode}.
+         * Warning: SysID routines make the wheels spin VERY fast.
+         * Give the robot LOTS of clearance (don't run SysID inside).
+         */
+        public static final boolean enableSysID = false;
+
+        /**
+         * The Feature Test button is an interface for testing expiremental features;
+         * see: {@link RobotContainer.featureTestMode}.
+         * Bind test features in {@link RobotContainer.configureButtonBindings}
+         */
+        public static final boolean enableFeatureTest = false;
+    }
+
+    public static final class SwerveConstants {
         public static final int pigeonID = 1;
 
         public static final COTSTalonFXSwerveConstants chosenModule =  //TODO: This must be tuned to specific robot
@@ -80,10 +98,12 @@ public final class Constants {
         /* Swerve Profiling Values */
         /** Meters per Second */
         public static final double maxSpeed = 0.5; //TODO: This must be tuned to specific robot
+        public static final double maxAccel = 0.5;
         /** Radians per Second */
         public static final double maxAngularVelocity = 1.0; //TODO: This must be tuned to specific robot
+        public static final double maxAngularAccel = 0.5;
         /* Global angle offset */
-        public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(-90);
+        public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(0);
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
@@ -131,11 +151,20 @@ public final class Constants {
         }
     }
 
+    public static final class ElevatorConstants {
+        // TODO: Remove this once fully implemented & fix errors. If only testing, DO NOT REMOVE, set to true!
+        public static final boolean implemented = false;
+
+        public static final int elevatorPosMotorID = 9;
+        public static final int elevatorNegMotorID = 10;
+        public static final double elevatorMaxSpeed = 0.3;
+    }
+
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-        public static final double kMaxSpeedMetersPerSecond = 0.5;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 0.5;
-        public static final double kMaxAngularSpeedRadiansPerSecond = 0.25;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.09;
+        public static final double kMaxSpeedMetersPerSecond = 0.2;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 0.2;
+        public static final double kMaxAngularSpeedRadiansPerSecond = 0.2;
+        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.2;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;

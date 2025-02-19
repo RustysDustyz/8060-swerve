@@ -17,56 +17,47 @@ import frc.lib.util.SwerveModuleConstants;
 public class SwerveModule {
     public int moduleNumber;
 
-    private boolean optReverse = false;
-    private boolean highDelta = false;
     private Rotation2d angleOffset;
+    private SwerveModuleState lastDesiredState;
+    private long rotationOffset = 0;
+    //private boolean reversed = false;
+    //private int reverseRotOffset = 0;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
 
-    private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
+    private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(Constants.SwerveConstants.driveKS, Constants.SwerveConstants.driveKV, Constants.SwerveConstants.driveKA);
 
     /* drive motor control requests */
     private final DutyCycleOut driveDutyCycle = new DutyCycleOut(0);
     private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
 
     /* angle motor control requests */
-    private final PositionVoltage anglePosition = new PositionVoltage(0);
     private final PIDController turningPidController;
 
-    private SwerveModuleState optimize(SwerveModuleState state, Rotation2d currentAngle){
-        double delta = state.angle.getDegrees() - (currentAngle.getDegrees() - angleOffset.getDegrees()) - Constants.Swerve.globalModuleAngleOffset.getDegrees();
-        //if(optReverse) delta -= 180;
-        delta = Math.abs(delta);
-        System.out.printf("delta: %.4f\na: %.4f/%.4f\nr: %b\n",delta,state.angle.getDegrees(),currentAngle.getDegrees(),optReverse);
-        if(!highDelta && delta > 90.0) {
-            highDelta = true;
-            optReverse = !optReverse;
-        }else if(highDelta && delta < 80.0){
-            highDelta = false;
-            optReverse = !optReverse;
+    private void optimize(SwerveModuleState desiredState){
+        if(lastDesiredState == null){
+            lastDesiredState = desiredState;
+            return;
         }
-        if(optReverse){
-            state.speedMetersPerSecond *= -1;
-            state.angle = state.angle.rotateBy(Rotation2d.kPi);
-        }
+        double valueDelta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
+        //double lastDesiredAngle = lastDesiredState.angle.getDegrees() + rotationOffset*360;
 
-        /*var delta = state.angle.minus(currentAngle);
-        System.out.printf("delta: %.4f\n",Math.abs(delta.getDegrees()))
-        if (Math.abs(delta.getDegrees()) > 90.0) {
-            optReverse = true;
+        if(Math.abs(valueDelta) > 180){
+            rotationOffset -= Math.signum(valueDelta);
         }
-        if(optReverse){
-            state.speedMetersPerSecond *= -1;
-            state.angle = state.angle.rotateBy(Rotation2d.kPi);
+        /*double stateDelta = (desiredState.angle.getDegrees() + rotationOffset*360) - lastDesiredAngle;
+        /System.out.printf("sd: %.2f\nr: %b\n",stateDelta,reversed);
+        if(Math.abs(stateDelta) > 90){
+            reversed = !reversed;
+            reverseRotOffset += (int)Math.signum(stateDelta)/2;
         }*/
-
-        return state;
-    }
-
-    public void resetOptimization(){
-        optReverse = false;
+        lastDesiredState = desiredState;
+        /*if(reversed){
+            desiredState.speedMetersPerSecond *= -1;
+            desiredState.angle = desiredState.angle.rotateBy(Rotation2d.kPi);
+        }*/
     }
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
@@ -78,7 +69,7 @@ public class SwerveModule {
         angleEncoder.getConfigurator().apply(Robot.ctreConfigs.swerveCANcoderConfig);
 
         turningPidController = new PIDController(0.5, 0, 0);
-        turningPidController.enableContinuousInput(-Math.PI, Math.PI);
+        turningPidController.enableContinuousInput(Math.PI, Math.PI);
 
         /* Angle Motor Config */
         mAngleMotor = new TalonFX(moduleConstants.angleMotorID);
@@ -92,24 +83,27 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
-        //if(angleEncoder.getDeviceID() == 4) System.out.printf("pre-op: %s\n",desiredState.toString());
-        SwerveModuleState optimizedState = optimize(desiredState,getState().angle);
-        //if(angleEncoder.getDeviceID() == 4) System.out.printf("post-op: %s\n",desiredState.toString());
+        optimize(desiredState);
+        
         mAngleMotor.set(turningPidController.calculate(
             mAngleMotor.getPosition().getValueAsDouble(),
-            optimizedState.angle.getRotations() + Constants.Swerve.globalModuleAngleOffset.getRotations()
+            desiredState.angle.getRotations()
+                + rotationOffset /*- reverseRotOffset*/
+                + Constants.SwerveConstants.globalModuleAngleOffset.getRotations()
+                
         ));
-        setSpeed(optimizedState, isOpenLoop);
+        
+        desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
+        setSpeed(desiredState, isOpenLoop);
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
-        //System.out.println(desiredState);
         if(isOpenLoop){
-            driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
+            driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
             mDriveMotor.setControl(driveDutyCycle);
         }
         else {
-            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference);
+            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.SwerveConstants.wheelCircumference);
             driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
             mDriveMotor.setControl(driveVelocity);
         }
@@ -119,6 +113,10 @@ public class SwerveModule {
         return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
+    public TalonFX getDriveMotor(){
+        return mDriveMotor;
+    }
+
     public void resetToAbsolute(){
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
@@ -126,15 +124,20 @@ public class SwerveModule {
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValueAsDouble(), Constants.Swerve.wheelCircumference), 
+            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValueAsDouble(), Constants.SwerveConstants.wheelCircumference), 
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValueAsDouble())
         );
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValueAsDouble(), Constants.Swerve.wheelCircumference), 
+            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValueAsDouble(), Constants.SwerveConstants.wheelCircumference), 
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValueAsDouble())
         );
+    }
+
+    public void setDriveVoltage(double voltage) {
+        driveDutyCycle.Output = voltage;
+        mDriveMotor.setControl(driveDutyCycle);
     }
 }

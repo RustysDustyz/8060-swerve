@@ -30,30 +30,28 @@ public class TeleopSwerve extends Command {
         this.robotCentricSup = robotCentricSup;
 
         // Initialize slew rate limiters for x, y, and turning speeds
-        this.translationLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-        this.strafeLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-        this.rotationLimiter = new SlewRateLimiter(Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared);
+        this.translationLimiter = new SlewRateLimiter(Constants.SwerveConstants.maxAccel);
+        this.strafeLimiter = new SlewRateLimiter(Constants.SwerveConstants.maxAccel);
+        this.rotationLimiter = new SlewRateLimiter(Constants.SwerveConstants.maxAngularAccel);
     }
 
     @Override
     public void execute() {
         /* Get Values, Deadband*/
-        double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband);
-        double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband);
-        double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
+        double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.translationDeadband);
+        double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.translationDeadband);
+        double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.angularDeadband);
 
-        translationVal = translationLimiter.calculate(translationVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
-        strafeVal = strafeLimiter.calculate(strafeVal) * Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared;
-        rotationVal = rotationLimiter.calculate(rotationVal) * Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared;
-
-        rotationVal = 0;
+        translationVal = translationLimiter.calculate(translationVal) * Constants.SwerveConstants.maxAccel;
+        strafeVal = strafeLimiter.calculate(strafeVal) * Constants.SwerveConstants.maxAccel;
+        rotationVal = rotationLimiter.calculate(rotationVal) * Constants.SwerveConstants.maxAngularAccel;
 
         //System.out.printf("t:%.3f, s:%.3f, r:%.3f\n",translationVal,strafeVal,rotationVal);
 
         /* Drive */
         s_Swerve.drive(
-            new Translation2d(-strafeVal, translationVal).times(Constants.Swerve.maxSpeed), 
-            rotationVal * Constants.Swerve.maxAngularVelocity, 
+            new Translation2d(-strafeVal, translationVal).times(Constants.SwerveConstants.maxSpeed), 
+            rotationVal * Constants.SwerveConstants.maxAngularVelocity, 
             !robotCentricSup.getAsBoolean(), 
             true
         );
