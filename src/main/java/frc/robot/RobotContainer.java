@@ -6,12 +6,14 @@ import java.util.List;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
@@ -40,16 +42,15 @@ public class RobotContainer {
     private final JoystickButton translationMode = new JoystickButton(driver, 1);
     // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
     //private final JoystickButton aimAssist = new JoystickButton(driver, 2);
-    private final JoystickButton sysidMode = new JoystickButton(driver, 3);
-    private final JoystickButton featureTestMode = new JoystickButton(driver, 4);
+    private final JoystickButton sysidInterface = new JoystickButton(driver, 3);
+    private final JoystickButton featureTestInterface = new JoystickButton(driver, 4);
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
-    private final Trigger notInterface = sysidMode.or(featureTestMode).negate();
+    private final Trigger notInterface = sysidInterface.or(featureTestInterface).negate();
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
-    private SignedMotors s_Elevator;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -58,10 +59,10 @@ public class RobotContainer {
             2. set s_Elevator to a private final field.
             3. fix any other errors that may occur.
         */
-        if(ElevatorConstants.implemented) new SignedMotors(
-            new Spark(ElevatorConstants.elevatorPosMotorID),
-            new Spark(ElevatorConstants.elevatorNegMotorID)
-        );
+        /*if(ElevatorConstants.implemented) new Subsystem(
+            new Spark(ElevatorConstants.leftMotorID),
+            new Spark(ElevatorConstants.rightMotorID)
+        );*/
 
         // SmartDashboard Inputs
         SmartDashboard.putNumber("startX", 0.5);
@@ -86,13 +87,13 @@ public class RobotContainer {
                 () -> robotCentric.getAsBoolean()
             )
         );
-        if(ElevatorConstants.implemented) s_Elevator.setDefaultCommand(
+        /*if(ElevatorConstants.implemented) s_Elevator.setDefaultCommand(
             new ElevatorCommand(
                 s_Elevator, () ->
                 driver.getPOV() == 0 ? 1
                     : (driver.getPOV() == 180 ? -1 : 0)
             )
-        );
+        );*/
 
         // Configure the button bindings
         configureButtonBindings();
@@ -111,36 +112,57 @@ public class RobotContainer {
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
 
         // Translation Mode : Press Btn 1 to toggle
-        translationMode.toggleOnTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
+        translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
 
         if(DriverConstants.enableSysID){
             // Sys ID Dynam Test : Press Btn 3 + 7 to start
             // Warning: Very fast!
-            sysidMode
+            sysidInterface
                 .and(new JoystickButton(driver, 7))
-                .toggleOnTrue(s_Swerve.getDriveDynamTest());
+                .onTrue(s_Swerve.getDriveDynamTest());
             // SYS ID Quad Test : Press Btn 3 + 8 to start
             // Warnin g: Very fast!
-            sysidMode
+            sysidInterface
                 .and(new JoystickButton(driver, 8))
-                .toggleOnTrue(s_Swerve.getDriveQuadTest());
+                .onTrue(s_Swerve.getDriveQuadTest());
         }else{
-            sysidMode.toggleOnTrue(new InstantCommand(() -> System.out.println(
-                "SysID button is disabled. Enable in Constants.DriverConstants.enableSysID"
+            sysidInterface.onTrue(new InstantCommand(() -> System.out.println(
+                "SysID interface is disabled. Enable in Constants.DriverConstants.enableSysID"
             )));
         }
 
         if(DriverConstants.enableFeatureTest){
-            // Feature Test - AprilTag Aim Assist : Press Btn 4 + 7 to start
-            featureTestMode
+            // Feature Test - Move test : Press Btn 4 + 7 to start
+            featureTestInterface
                 .and(new JoystickButton(driver, 7))
-                .toggleOnTrue(new InstantCommand(s_Swerve::ft_aimAssist));
+                .onTrue(
+                    new RunCommand(
+                        () -> {for(SwerveModule m : s_Swerve.getModules()){
+                            m.getDriveMotor().set(0.25);
+                        }}
+                    ).until(new JoystickButton(driver, 7).negate())
+                );
+
+            // Feature Test - Voltage test : Press Btn 4 + 8 to start
+            featureTestInterface
+                .and(new JoystickButton(driver, 8))
+                .onTrue(
+                    new RunCommand(
+                        () -> {for(SwerveModule m : s_Swerve.getModules()){
+                            m.setDriveVoltage(0.5);
+                        }}
+                    ).until(new JoystickButton(driver, 8).negate())
+                );
+        }else{
+            featureTestInterface.onTrue(new InstantCommand(() -> System.out.println(
+                "Feature Test interface is disabled. Enable in Constants.DriverConstants.enableFeatureTest"
+            )));
         }
 
         // Non-interface buttons
         new JoystickButton(driver, 7)
             .and(notInterface)
-            .toggleOnTrue(new InstantCommand(() -> System.out.println("Non interface btn 7 activated")));
+            .onTrue(new InstantCommand(() -> System.out.println("Base btn 7")));
     }
 
     /**

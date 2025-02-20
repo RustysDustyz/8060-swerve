@@ -106,14 +106,13 @@ public class Swerve extends SubsystemBase {
             if(Math.abs(rotation) > 0.001){
                 // fix modules
                 if(mod.moduleNumber == 1)
-                swerveModuleStates[mod.moduleNumber].speedMetersPerSecond *= -1;
+                    swerveModuleStates[mod.moduleNumber].speedMetersPerSecond *= -1;
                 if(mod.moduleNumber == 2)
-                swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
-                    Rotation2d.kCCW_Pi_2);
+                    swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
+                        Rotation2d.kCCW_Pi_2);
                 if(mod.moduleNumber == 3)
-                swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
-                    Rotation2d.kCW_Pi_2);
-                
+                    swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
+                        Rotation2d.kCW_Pi_2);
                 
                 // un-global offset for z-axis
                 swerveModuleStates[mod.moduleNumber].angle = 
@@ -160,6 +159,10 @@ public class Swerve extends SubsystemBase {
 
     public Rotation2d getHeading(){
         return getPose().getRotation().times(-1);
+    }
+
+    public SwerveModule[] getModules(){
+        return mSwerveMods;
     }
 
     public void setHeading(Rotation2d heading){

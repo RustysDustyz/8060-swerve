@@ -30,7 +30,7 @@ public final class Constants {
          * see: {@link RobotContainer.featureTestMode}.
          * Bind test features in {@link RobotContainer.configureButtonBindings}
          */
-        public static final boolean enableFeatureTest = false;
+        public static final boolean enableFeatureTest = true;
     }
 
     public static final class SwerveConstants {
@@ -155,8 +155,8 @@ public final class Constants {
         // TODO: Remove this once fully implemented & fix errors. If only testing, DO NOT REMOVE, set to true!
         public static final boolean implemented = false;
 
-        public static final int elevatorPosMotorID = 9;
-        public static final int elevatorNegMotorID = 10;
+        public static final int leftMotorID = 9;
+        public static final int rightMotorID = 10;
         public static final double elevatorMaxSpeed = 0.3;
     }
 
