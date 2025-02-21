@@ -109,6 +109,10 @@ public final class Constants {
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
         public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
 
+        /* Options */
+        // If wheels should prioritize reversing over turning in optimization.
+        public static boolean optimizeWheelReverse = false;
+
         /* Module Specific Constants */
         /* Front Left Module - Module 0 */
         public static final class Mod0 { //TODO: This must be tuned to specific robot
@@ -116,8 +120,10 @@ public final class Constants {
             public static final int angleMotorID = 1;
             public static final int canCoderID = 1;
             public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.0512);
+            public static final boolean sineCompensation = false;
+            public static final boolean reversed = false;
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, sineCompensation, reversed);
         }
 
         /* Front Right Module - Module 1 */
@@ -126,8 +132,10 @@ public final class Constants {
             public static final int angleMotorID = 3;
             public static final int canCoderID = 2;
             public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.3781);
+            public static final boolean sineCompensation = false;
+            public static final boolean reversed = true;
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, sineCompensation, reversed);
         }
         
         /* Back Left Module - Module 2 */
@@ -136,8 +144,10 @@ public final class Constants {
             public static final int angleMotorID = 5;
             public static final int canCoderID = 3;
             public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.0627);
+            public static final boolean sineCompensation = false;
+            public static final boolean reversed = false;
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, sineCompensation, reversed);
         }
 
         /* Back Right Module - Module 3 */
@@ -146,8 +156,10 @@ public final class Constants {
             public static final int angleMotorID = 7;
             public static final int canCoderID = 4;
             public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.2639);
+            public static final boolean sineCompensation = true;
+            public static final boolean reversed = false;
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, sineCompensation, reversed);
         }
     }
 

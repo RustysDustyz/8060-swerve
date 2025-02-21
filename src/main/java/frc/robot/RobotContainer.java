@@ -1,15 +1,12 @@
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.configs.AudioConfigs;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.MusicTone;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -17,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -120,6 +116,7 @@ public class RobotContainer {
             sysidInterface
                 .and(new JoystickButton(driver, 7))
                 .onTrue(s_Swerve.getDriveDynamTest());
+                
             // SYS ID Quad Test : Press Btn 3 + 8 to start
             // Warnin g: Very fast!
             sysidInterface
@@ -143,15 +140,16 @@ public class RobotContainer {
                     ).until(new JoystickButton(driver, 7).negate())
                 );
 
-            // Feature Test - Voltage test : Press Btn 4 + 8 to start
+            // Feature Test - Reset motor optimization : Press Btn 4 + 8 to start
             featureTestInterface
                 .and(new JoystickButton(driver, 8))
                 .onTrue(
-                    new RunCommand(
+                    new InstantCommand(
                         () -> {for(SwerveModule m : s_Swerve.getModules()){
-                            m.setDriveVoltage(0.5);
+                            m.getDriveMotor().setControl(new MusicTone(880));
+                            m.resetOptimization();
                         }}
-                    ).until(new JoystickButton(driver, 8).negate())
+                    )
                 );
         }else{
             featureTestInterface.onTrue(new InstantCommand(() -> System.out.println(

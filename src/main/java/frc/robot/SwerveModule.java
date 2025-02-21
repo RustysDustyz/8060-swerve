@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -13,6 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.math.Conversions;
 import frc.lib.util.SwerveModuleConstants;
+import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModule {
     public int moduleNumber;
@@ -20,12 +20,13 @@ public class SwerveModule {
     private Rotation2d angleOffset;
     private SwerveModuleState lastDesiredState;
     private long rotationOffset = 0;
-    //private boolean reversed = false;
-    //private int reverseRotOffset = 0;
+    private boolean reversed = false;
+    private int reverseRotOffset = 0;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
+    private SwerveModuleConstants moduleConstants;
 
     private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(Constants.SwerveConstants.driveKS, Constants.SwerveConstants.driveKV, Constants.SwerveConstants.driveKA);
 
@@ -36,33 +37,43 @@ public class SwerveModule {
     /* angle motor control requests */
     private final PIDController turningPidController;
 
+    public void resetOptimization(){
+        rotationOffset = 0;
+        reverseRotOffset = 0;
+        reversed = false;
+        lastDesiredState = null;
+    }
+
     private void optimize(SwerveModuleState desiredState){
         if(lastDesiredState == null){
             lastDesiredState = desiredState;
             return;
         }
         double valueDelta = desiredState.angle.getDegrees() - lastDesiredState.angle.getDegrees();
-        //double lastDesiredAngle = lastDesiredState.angle.getDegrees() + rotationOffset*360;
+        double lastDesiredAngle = lastDesiredState.angle.getDegrees() + rotationOffset*360;
 
         if(Math.abs(valueDelta) > 180){
             rotationOffset -= Math.signum(valueDelta);
         }
-        /*double stateDelta = (desiredState.angle.getDegrees() + rotationOffset*360) - lastDesiredAngle;
-        /System.out.printf("sd: %.2f\nr: %b\n",stateDelta,reversed);
-        if(Math.abs(stateDelta) > 90){
-            reversed = !reversed;
-            reverseRotOffset += (int)Math.signum(stateDelta)/2;
-        }*/
+        double stateDelta = (desiredState.angle.getDegrees() + rotationOffset*360) - lastDesiredAngle;
+        //System.out.printf("sd: %.2f\nr: %b\n",stateDelta,reversed);
+        if(SwerveConstants.optimizeWheelReverse){
+            if(Math.abs(stateDelta) > 90){
+                reversed = !reversed;
+                reverseRotOffset += (int)Math.signum(stateDelta)/2;
+            }
+        }
         lastDesiredState = desiredState;
-        /*if(reversed){
+        if(reversed){
             desiredState.speedMetersPerSecond *= -1;
             desiredState.angle = desiredState.angle.rotateBy(Rotation2d.kPi);
-        }*/
+        }
     }
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
         this.angleOffset = moduleConstants.angleOffset;
+        this.moduleConstants = moduleConstants;
         
         /* Angle Encoder Config */
         angleEncoder = new CANcoder(moduleConstants.cancoderID);
@@ -88,23 +99,31 @@ public class SwerveModule {
         mAngleMotor.set(turningPidController.calculate(
             mAngleMotor.getPosition().getValueAsDouble(),
             desiredState.angle.getRotations()
-                + rotationOffset /*- reverseRotOffset*/
+                + rotationOffset - reverseRotOffset
                 + Constants.SwerveConstants.globalModuleAngleOffset.getRotations()
                 
         ));
-        
-        desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
+
+        if(moduleConstants.sineCompensation){
+            desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getSin() * -1;
+        }else{
+            desiredState.speedMetersPerSecond *= desiredState.angle.minus(getCANcoder()).getCos();
+        }
+        if(moduleConstants.reversed) desiredState.speedMetersPerSecond *= -1;
+        //desiredState.cosineScale(getCANcoder());
         setSpeed(desiredState, isOpenLoop);
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
         if(isOpenLoop){
             driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
+            //mDriveMotor.set(driveDutyCycle.Output);
             mDriveMotor.setControl(driveDutyCycle);
         }
         else {
             driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.SwerveConstants.wheelCircumference);
             driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
+            //mDriveMotor.set(driveVelocity.FeedForward);
             mDriveMotor.setControl(driveVelocity);
         }
     }

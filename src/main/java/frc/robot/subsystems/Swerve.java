@@ -12,6 +12,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,9 +21,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.units.BaseUnits;
-import edu.wpi.first.units.measure.MutDistance;
-import edu.wpi.first.units.measure.MutLinearVelocity;
-import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,9 +35,11 @@ public class Swerve extends SubsystemBase {
     public ADXRS450_Gyro gyro;
 
     public final StructArrayPublisher<SwerveModuleState> publisher;
+    /*
     private final MutVoltage m_appliedVoltage = Volts.mutable(0);
     private final MutDistance m_distance = Meters.mutable(0);
     private final MutLinearVelocity m_velocity = MetersPerSecond.mutable(0);
+    */
 
     private SysIdRoutine m_driveSysIdRoutine =
     new SysIdRoutine(
@@ -50,16 +51,16 @@ public class Swerve extends SubsystemBase {
             },
             log -> {
                 for(SwerveModule mod : mSwerveMods){
-                    log.motor(String.format("mod%d",mod.moduleNumber))
-                    .voltage(m_appliedVoltage.mut_replace(mod.getDriveMotor().get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(mod.getPosition().distanceMeters,Meters))
-                    .linearVelocity(m_velocity.mut_replace(mod.getState().speedMetersPerSecond,MetersPerSecond));
+                    SignalLogger.writeDouble(String.format("mod%d-voltage",mod.moduleNumber), mod.getDriveMotor().get() * RobotController.getBatteryVoltage(),"V");
+                    SignalLogger.writeDouble(String.format("mod%d-distance",mod.moduleNumber), mod.getPosition().distanceMeters,"m");
+                    SignalLogger.writeDouble(String.format("mod%d-velocity",mod.moduleNumber), mod.getState().speedMetersPerSecond,"m/s");
                 }
             },
             this
         ));
 
     public Swerve() {
+        //SignalLogger.setPath("/home/lvuser/logs/");
         gyro = new ADXRS450_Gyro();
         gyro.reset();
 
@@ -102,11 +103,8 @@ public class Swerve extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.SwerveConstants.maxSpeed);
 
         for(SwerveModule mod : mSwerveMods){
-            
             if(Math.abs(rotation) > 0.001){
                 // fix modules
-                if(mod.moduleNumber == 1)
-                    swerveModuleStates[mod.moduleNumber].speedMetersPerSecond *= -1;
                 if(mod.moduleNumber == 2)
                     swerveModuleStates[mod.moduleNumber].angle = swerveModuleStates[mod.moduleNumber].angle.rotateBy(
                         Rotation2d.kCCW_Pi_2);
