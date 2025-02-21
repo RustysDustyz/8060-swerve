@@ -80,6 +80,7 @@ public class Swerve extends SubsystemBase {
         transMode = !transMode;
     }
 
+
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
         //System.out.println(translation);
         if(transMode) rotation = 0;
