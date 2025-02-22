@@ -1,8 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix6.Orchestra;
-import com.ctre.phoenix6.configs.AudioConfigs;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.wpilibj.GenericHID;
