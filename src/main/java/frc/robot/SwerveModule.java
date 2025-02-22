@@ -115,6 +115,7 @@ public class SwerveModule {
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
+        //System.out.println(desiredState);
         if(isOpenLoop){
             driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
             //mDriveMotor.set(driveDutyCycle.Output);
