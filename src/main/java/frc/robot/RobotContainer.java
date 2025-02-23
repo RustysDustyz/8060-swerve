@@ -44,6 +44,22 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
+    private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
+
+    /* Elevator Setpoints (in meters) */
+    private static final double ELEVATOR_SETPOINT_1 = 0.1;  // Example Low Position
+    private static final double ELEVATOR_SETPOINT_2 = 0.3;  // Mid-Low
+    private static final double ELEVATOR_SETPOINT_3 = 0.6;  // Mid
+    private static final double ELEVATOR_SETPOINT_4 = 0.9;  // Mid-High
+    private static final double ELEVATOR_SETPOINT_5 = 1.2;  // Max Height
+
+    /* Elevator Control Buttons */
+    private final JoystickButton elevatorButton1 = new JoystickButton(driver, 7);  // Assign buttons
+    private final JoystickButton elevatorButton2 = new JoystickButton(driver, 8);
+    private final JoystickButton elevatorButton3 = new JoystickButton(driver, 9);
+    private final JoystickButton elevatorButton4 = new JoystickButton(driver, 10);
+    private final JoystickButton elevatorButton5 = new JoystickButton(driver, 11);
+
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -80,13 +96,12 @@ public class RobotContainer {
                 () -> robotCentric.getAsBoolean()
             )
         );
-        /*if(ElevatorConstants.implemented) s_Elevator.setDefaultCommand(
-            new ElevatorCommand(
-                s_Elevator, () ->
-                driver.getPOV() == 0 ? 1
-                    : (driver.getPOV() == 180 ? -1 : 0)
+        s_Elevator.setDefaultCommand(
+            new RunCommand(
+                () -> s_Elevator.updateElevator(), 
+                s_Elevator
             )
-        );*/
+        );
 
         // Configure the button bindings
         configureButtonBindings();
@@ -99,6 +114,14 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        
+        /* Elevator Setpoints */
+        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_1));
+        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_2));
+        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_3));
+        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_4));
+        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_5));
+        
         /* Driver Buttons */
 
         // Zero Gyro : Press or hold Btn 6 to reset heading
