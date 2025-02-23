@@ -16,13 +16,14 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-  // Motors & Encoder
+  // elevator Motors & Encoder
   private final SparkMax leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
   private final SparkMax rightMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
-  private final RelativeEncoder m_encoder = leftMotor.getEncoder();
+  private final RelativeEncoder elev_encoder = leftMotor.getEncoder();
 
-  private final SparkMaxConfig motorConfig = new SparkMaxConfig();
-  //private final SparkBaseConfig motor1Config;
+  // Claw Motor and Encoder
+  private final SparkMax clawMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
+  private final RelativeEncoder clw_encoder = leftMotor.getEncoder();
 
   // Motion Controllers
   private final ProfiledPIDController m_controller = 
@@ -32,24 +33,24 @@ public class ElevatorSubsystem extends SubsystemBase {
       new ElevatorFeedforward(ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV);
 
   public ElevatorSubsystem() {
-
-    motorConfig.encoder
-      .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
-      .velocityConversionFactor(getElevatorPositionMeters() / 60);
-    
+  
     SparkMaxConfig globalConfig = new SparkMaxConfig();
     SparkMaxConfig rightConfig = new SparkMaxConfig();
 
     
     globalConfig
         .smartCurrentLimit(50)
-        .idleMode(IdleMode.kBrake);
+        .idleMode(IdleMode.kBrake)
+        .encoder
+          .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
+          .velocityConversionFactor(getElevatorPositionMeters() / 60);;
 
     // Apply the global config and invert since it is on the opposite side
     rightConfig
         .apply(globalConfig)
         .inverted(true)
         .follow(leftMotor);
+        
     /*
      * Apply the configuration to the SPARKs.
      *
@@ -62,15 +63,16 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    clawMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
   }
 
   public double getElevatorPositionMeters() {
-    return m_encoder.getPosition(); // Convert motor rotations to meters
+    return elev_encoder.getPosition(); 
   }
 
   public double getElevatorVelocityMetersPerSecond() {
-    return m_encoder.getVelocity(); // Convert RPM to m/s
+    return elev_encoder.getVelocity();
   }
 
   public void setElevatorGoal(double goal) {
@@ -94,6 +96,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void stopElevator() {
     rightMotor.setVoltage(0);
   }
+
+  public double getClawPositionMeters() {
+    return clw_encoder.getPosition();
+  }
+  
 
   @Override
   public void periodic() {
