@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -33,25 +34,22 @@ public class RobotContainer {
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
     private final JoystickButton translationMode = new JoystickButton(driver, 1);
+
     // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
-    //private final JoystickButton aimAssist = new JoystickButton(driver, 2);
+    private final JoystickButton aimAssist = new JoystickButton(driver, 2);
+
     private final JoystickButton sysidInterface = new JoystickButton(driver, 3);
     private final JoystickButton featureTestInterface = new JoystickButton(driver, 4);
+    
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
     private final Trigger notInterface = sysidInterface.or(featureTestInterface).negate();
 
     /* Subsystems */
+    private final LimelightConfig s_LimelightConfig = new LimelightConfig();
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
-
-    /* Elevator Setpoints (in meters) */
-    private static final double ELEVATOR_SETPOINT_1 = 0.1;  // Example Low Position
-    private static final double ELEVATOR_SETPOINT_2 = 0.3;  // Mid-Low
-    private static final double ELEVATOR_SETPOINT_3 = 0.6;  // Mid
-    private static final double ELEVATOR_SETPOINT_4 = 0.9;  // Mid-High
-    private static final double ELEVATOR_SETPOINT_5 = 1.2;  // Max Height
 
     /* Elevator Control Buttons */
     private final JoystickButton elevatorButton1 = new JoystickButton(driver, 7);  // Assign buttons
@@ -93,7 +91,8 @@ public class RobotContainer {
                 () -> -driver.getRawAxis(translationAxis), 
                 () -> -driver.getRawAxis(strafeAxis), 
                 () -> -driver.getRawAxis(rotationAxis), 
-                () -> robotCentric.getAsBoolean()
+                () -> robotCentric.getAsBoolean(),
+                () -> aimAssist.getAsBoolean()
             )
         );
         s_Elevator.setDefaultCommand(
@@ -116,11 +115,11 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_1));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_2));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_3));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_4));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, ELEVATOR_SETPOINT_5));
+        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_1));
+        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_2));
+        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_3));
+        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_4));
+        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_5));
         
         /* Driver Buttons */
 

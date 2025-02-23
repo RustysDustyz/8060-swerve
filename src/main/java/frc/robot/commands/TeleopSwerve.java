@@ -5,6 +5,7 @@ import frc.robot.subsystems.Swerve;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -18,9 +19,10 @@ public class TeleopSwerve extends Command {
     private DoubleSupplier strafeSup;
     private DoubleSupplier rotationSup;
     private BooleanSupplier robotCentricSup;
+    private final Supplier<Boolean> aimAssist;
     private final SlewRateLimiter translationLimiter, strafeLimiter, rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, Supplier<Boolean> aimAssist) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -28,6 +30,7 @@ public class TeleopSwerve extends Command {
         this.strafeSup = strafeSup;
         this.rotationSup = rotationSup;
         this.robotCentricSup = robotCentricSup;
+        this.aimAssist = aimAssist;
 
         // Initialize slew rate limiters for x, y, and turning speeds
         this.translationLimiter = new SlewRateLimiter(Constants.SwerveConstants.maxAccel);
@@ -53,7 +56,8 @@ public class TeleopSwerve extends Command {
             new Translation2d(-strafeVal, translationVal).times(Constants.SwerveConstants.maxSpeed), 
             rotationVal * Constants.SwerveConstants.maxAngularVelocity, 
             !robotCentricSup.getAsBoolean(), 
-            true
+            true,
+            aimAssist.get()
         );
     }
 }

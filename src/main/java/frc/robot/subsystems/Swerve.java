@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
 import frc.robot.Constants;
-
+import frc.robot.LimelightHelpers;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -72,16 +72,41 @@ public class Swerve extends SubsystemBase {
         .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     }
 
-    public void ft_aimAssist(){
-        throw new UnsupportedOperationException("Aim Assist is unimplemented.");
+    public double rot_aimAssist(){
+        double kP_rot = 0.035; // Tune this value based on testing
+        //•	  If the robot overshoots, reduce kP.
+        //•	  If the robot is too slow, increase kP.
+        double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
+        double rotationSpeed = tx * kP_rot * Constants.SwerveConstants.maxAngularVelocity;
+        
+        return -rotationSpeed;
+    }
+
+    public Translation2d fwd_aimAssist(){
+        double kP_fwd = 0.1; // Tune this value based on testing
+        //•	  If the robot overshoots, reduce kP.
+        //•	  If the robot is too slow, increase kP.
+        double ty = LimelightHelpers.getTY("limelight"); // Horizontal error
+        double forwardSpeed = ty * kP_fwd * Constants.SwerveConstants.maxSpeed;
+        
+        return new Translation2d(forwardSpeed, 0);
     }
 
     public void toggleTransMode(){
         transMode = !transMode;
     }
 
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean aimAssist) {
         //System.out.println(translation);
+
+        if (aimAssist) {
+            rotation = rot_aimAssist();
+            translation = fwd_aimAssist();
+            // we could also do this:
+            // translation = translation.plus(fwd_aimAssist());
+            fieldRelative = false; // Disable field-relative while aiming
+        }
+
         if(transMode) rotation = 0;
         SwerveModuleState[] swerveModuleStates =
             Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(
@@ -184,6 +209,8 @@ public class Swerve extends SubsystemBase {
     public Command getDriveDynamTest(){
         return m_driveSysIdRoutine.dynamic(SysIdRoutine.Direction.kForward);
     }
+
+    
 
     @Override
     public void periodic(){
