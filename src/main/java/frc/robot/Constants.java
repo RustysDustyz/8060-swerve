@@ -165,7 +165,7 @@ public final class Constants {
 
     public static final class ElevatorConstants {
         // TODO: Remove this once fully implemented & fix errors. If only testing, DO NOT REMOVE, set to true!
-        public static final boolean implemented = true; // Set to true since it's now integrated
+        public static final boolean implemented = false; // Set to true since it's now integrated
 
         /* Motor IDs */
         public static final int rightMotorID = 1; 
@@ -199,6 +199,8 @@ public final class Constants {
         public static final double ELEVATOR_SETPOINT_3 = 0.6;  // Mid
         public static final double ELEVATOR_SETPOINT_4 = 0.9;  // Mid-High
         public static final double ELEVATOR_SETPOINT_5 = 1.2;  // Max Height
+
+        public static final double CLAW_CONVERSION_FACTOR = 1;
     }
 
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot

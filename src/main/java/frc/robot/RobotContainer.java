@@ -61,15 +61,6 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        /* FIXME: Once you've deleted ElevatorConstants.implemented:
-            1. assign the s_Elevator field to this value.
-            2. set s_Elevator to a private final field.
-            3. fix any other errors that may occur.
-        */
-        /*if(ElevatorConstants.implemented) new Subsystem(
-            new Spark(ElevatorConstants.leftMotorID),
-            new Spark(ElevatorConstants.rightMotorID)
-        );*/
 
         // SmartDashboard Inputs
         SmartDashboard.putNumber("startX", 0.5);

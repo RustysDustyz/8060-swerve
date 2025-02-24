@@ -23,7 +23,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   // Claw Motor and Encoder
   private final SparkMax clawMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
-  private final RelativeEncoder clw_encoder = leftMotor.getEncoder();
+  private final RelativeEncoder claw_encoder = leftMotor.getEncoder();
 
   // Motion Controllers
   private final ProfiledPIDController m_controller = 
@@ -43,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         .idleMode(IdleMode.kBrake)
         .encoder
           .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
-          .velocityConversionFactor(getElevatorPositionMeters() / 60);;
+          .velocityConversionFactor(getElevatorPositionMeters() / 60);
 
     // Apply the global config and invert since it is on the opposite side
     rightConfig
@@ -63,7 +63,14 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    clawMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    /* */
+    SparkMaxConfig clawConfig = new SparkMaxConfig();
+        clawConfig
+            .smartCurrentLimit(20) // Adjust as needed
+            .idleMode(IdleMode.kBrake)
+            .encoder.positionConversionFactor(ElevatorConstants.CLAW_CONVERSION_FACTOR);
+        
+    clawMotor.configure(clawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
   }
 
@@ -78,14 +85,14 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void setElevatorGoal(double goal) {
     m_controller.setGoal(goal);
   }
-
+  
   public void updateElevator() {
     double output = m_controller.calculate(getElevatorPositionMeters())
                     + m_feedforward.calculate(m_controller.getSetpoint().velocity);
     
     // Clamp output to safe voltage range
     output = Math.max(Math.min(output, 12), -12);
-    rightMotor.setVoltage(output); // Follower automatically follows lead motor
+    //rightMotor.setVoltage(output); // Follower automatically follows lead motor
 
     // Stop motor when within 1 cm of goal
     if (Math.abs(m_controller.getGoal().position - getElevatorPositionMeters()) < 0.01) {
@@ -97,8 +104,20 @@ public class ElevatorSubsystem extends SubsystemBase {
     rightMotor.setVoltage(0);
   }
 
-  public double getClawPositionMeters() {
-    return clw_encoder.getPosition();
+  /** Gets the current claw angle (in degrees or radians) */
+  public double getClawAngle() {
+    return claw_encoder.getPosition();
+  }
+
+  /** Sets the desired claw angle */
+  public void setClawGoal(double goal) {
+      // clawController.setGoal(goal);
+  }
+
+
+  /** Stops the claw */
+  public void stopClaw() {
+      clawMotor.setVoltage(0);
   }
   
 
