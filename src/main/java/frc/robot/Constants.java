@@ -111,7 +111,11 @@ public final class Constants {
 
         /* Options */
         // If wheels should prioritize reversing over turning in optimization.
-        public static boolean optimizeWheelReverse = false;
+        public static boolean optimizeWheelReverse = true;
+
+        public static final class CameraConstants {
+            public static final boolean enabled = false;
+        }
 
         /* Module Specific Constants */
         /* Front Left Module - Module 0 */

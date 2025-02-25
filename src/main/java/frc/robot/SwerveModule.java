@@ -21,7 +21,7 @@ public class SwerveModule {
     private SwerveModuleState lastDesiredState;
     private long rotationOffset = 0;
     private boolean reversed = false;
-    private int reverseRotOffset = 0;
+    private double reverseRotOffset = 0;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
@@ -38,6 +38,7 @@ public class SwerveModule {
     private final PIDController turningPidController;
 
     public void resetOptimization(){
+        System.out.printf("reset module %d\n",moduleNumber);
         rotationOffset = 0;
         reverseRotOffset = 0;
         reversed = false;
@@ -56,18 +57,13 @@ public class SwerveModule {
             rotationOffset -= Math.signum(valueDelta);
         }
         double stateDelta = (desiredState.angle.getDegrees() + rotationOffset*360) - lastDesiredAngle;
-        //System.out.printf("sd: %.2f\nr: %b\n",stateDelta,reversed);
         if(SwerveConstants.optimizeWheelReverse){
             if(Math.abs(stateDelta) > 90){
                 reversed = !reversed;
-                reverseRotOffset += (int)Math.signum(stateDelta)/2;
+                reverseRotOffset += Math.signum(stateDelta)/2;
             }
         }
         lastDesiredState = desiredState;
-        if(reversed){
-            desiredState.speedMetersPerSecond *= -1;
-            desiredState.angle = desiredState.angle.rotateBy(Rotation2d.kPi);
-        }
     }
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
