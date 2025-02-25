@@ -1,6 +1,6 @@
 package frc.robot.commands;
 
-import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ElevatorSetpointCommand extends Command {
@@ -25,13 +25,14 @@ public class ElevatorSetpointCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    double currentHeight = m_subsystem.getElevatorPositionMeters();
-    return Math.abs(currentHeight - m_goal) < 0.05; // Allow small tolerance
+    // Command is finished when the elevator reaches its goal
+    return m_subsystem.getEncoderDistance() >= m_goal - 0.1
+        && m_subsystem.getEncoderDistance() <= m_goal + 0.1;
   }
 
   @Override
   public void end(boolean interrupted) {
-    // Stop motor when command ends
-    m_subsystem.stopElevator();
+    // Optionally stop the motor when the command ends
+    m_subsystem.updateElevator();
   }
 }
