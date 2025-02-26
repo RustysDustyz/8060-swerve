@@ -1,130 +1,49 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
+  private static double kDt = 0.02;
+  private static double kMaxVelocity = 1.75;
+  private static double kMaxAcceleration = 0.75;
+  private static double kP = 1.3;
+  private static double kI = 0.0;
+  private static double kD = 0.7;
+  private static double kS = 1.1;
+  private static double kG = 1.2;
+  private static double kV = 1.3;
 
-  // elevator Motors & Encoder
-  private final SparkMax leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
-  private final SparkMax rightMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
-  private final RelativeEncoder elev_encoder = leftMotor.getEncoder();
+  private final Encoder m_encoder = new Encoder(0, 1);
+  private final PWMSparkMax m_motor = new PWMSparkMax(1);
 
-  // Claw Motor and Encoder
-  private final SparkMax clawMotor = new SparkMax(ElevatorConstants.clawMotorID, MotorType.kBrushless);
-  private final RelativeEncoder claw_encoder = leftMotor.getEncoder();
-
-  // Motion Controllers
-  private final ProfiledPIDController m_controller = 
-      new ProfiledPIDController(ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD, 
-                                ElevatorConstants.CONSTRAINTS, 0.02);
-  private final ElevatorFeedforward m_feedforward = 
-      new ElevatorFeedforward(ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV);
+  // PID and feedforward controllers
+  private final TrapezoidProfile.Constraints m_constraints =
+      new TrapezoidProfile.Constraints(kMaxVelocity, kMaxAcceleration);
+  private final ProfiledPIDController m_controller =
+      new ProfiledPIDController(kP, kI, kD, m_constraints, kDt);
+  private final ElevatorFeedforward m_feedforward = new ElevatorFeedforward(kS, kG, kV);
 
   public ElevatorSubsystem() {
-  
-    SparkMaxConfig globalConfig = new SparkMaxConfig();
-    SparkMaxConfig rightConfig = new SparkMaxConfig();
-
-    
-    globalConfig
-        .smartCurrentLimit(50)
-        .idleMode(IdleMode.kBrake)
-        .encoder
-          .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
-          .velocityConversionFactor(getElevatorPositionMeters() / 60);
-
-    // Apply the global config and invert since it is on the opposite side
-    rightConfig
-        .apply(globalConfig)
-        .inverted(true)
-        .follow(leftMotor);
-        
-    /*
-     * Apply the configuration to the SPARKs.
-     *
-     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-     * is useful in case the SPARK MAX is replaced.
-     *
-     * kPersistParameters is used to ensure the configuration is not lost when
-     * the SPARK MAX loses power. This is useful for power cycles that may occur
-     * mid-operation.
-     */
-    leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    /* */
-    SparkMaxConfig clawConfig = new SparkMaxConfig();
-        clawConfig
-            .smartCurrentLimit(20) // Adjust as needed
-            .idleMode(IdleMode.kBrake)
-            .encoder.positionConversionFactor(ElevatorConstants.CLAW_CONVERSION_FACTOR);
-        
-    clawMotor.configure(clawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-  }
-
-  public double getElevatorPositionMeters() {
-    return elev_encoder.getPosition(); 
-  }
-
-  public double getElevatorVelocityMetersPerSecond() {
-    return elev_encoder.getVelocity();
+    m_encoder.setDistancePerPulse(1.0 / 360.0 * 2.0 * Math.PI * 1.5);
   }
 
   public void setElevatorGoal(double goal) {
     m_controller.setGoal(goal);
   }
-  
+
   public void updateElevator() {
-    double output = m_controller.calculate(getElevatorPositionMeters())
-                    + m_feedforward.calculate(m_controller.getSetpoint().velocity);
-    
-    // Clamp output to safe voltage range
-    output = Math.max(Math.min(output, 12), -12);
-    //rightMotor.setVoltage(output); // Follower automatically follows lead motor
-
-    // Stop motor when within 1 cm of goal
-    if (Math.abs(m_controller.getGoal().position - getElevatorPositionMeters()) < 0.01) {
-        stopElevator();
-    }
+    // Run the controller and apply voltage to the motor
+    m_motor.setVoltage(
+        m_controller.calculate(m_encoder.getDistance())
+            + m_feedforward.calculate(m_controller.getSetpoint().velocity));
   }
 
-  public void stopElevator() {
-    rightMotor.setVoltage(0);
-  }
-
-  /** Gets the current claw angle (in degrees or radians) */
-  public double getClawAngle() {
-    return claw_encoder.getPosition();
-  }
-
-  /** Sets the desired claw angle */
-  public void setClawGoal(double goal) {
-      // clawController.setGoal(goal);
-  }
-
-
-  /** Stops the claw */
-  public void stopClaw() {
-      clawMotor.setVoltage(0);
-  }
-  
-
-  @Override
-  public void periodic() {
-    // Display encoder readings on SmartDashboard
-    SmartDashboard.putNumber("Elevator Height (m)", getElevatorPositionMeters());
-    SmartDashboard.putNumber("Elevator Velocity (m/s)", getElevatorVelocityMetersPerSecond());
+  public double getEncoderDistance() {
+    return m_encoder.getDistance();
   }
 }
