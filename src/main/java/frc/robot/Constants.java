@@ -172,8 +172,9 @@ public final class Constants {
         public static final boolean implemented = false; // Set to true since it's now integrated
 
         /* Motor IDs */
-        public static final int rightMotorID = 1; 
-        public static final int leftMotorID = 9;
+        public static final int rightMotorID = 9; 
+        public static final int leftMotorID = 10;
+        public static final int clawMotorID = 11;
 
         /* Gear Ratio & Pulley System */
         public static final double GEAR_RATIO = 60.0;  // 1:60 gearbox

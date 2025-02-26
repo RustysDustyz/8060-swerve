@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -20,6 +25,7 @@ import frc.robot.Constants.SwerveConstants.CameraConstants;
  */
 public class Robot extends TimedRobot {
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
+  public static RobotConfig robotConfig;
 
   private Command m_autonomousCommand;
 
@@ -33,6 +39,11 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    try {
+      robotConfig = RobotConfig.fromGUISettings();
+    } catch (IOException | ParseException e) {
+      e.printStackTrace();
+    }
     m_robotContainer = new RobotContainer();
   }
 

@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.ctre.phoenix6.controls.MusicTone;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -106,11 +108,11 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_1));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_2));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_3));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_4));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_5));
+        elevatorButton1.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_1));
+        elevatorButton2.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_2));
+        elevatorButton3.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_3));
+        elevatorButton4.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_4));
+        elevatorButton5.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_5));
         
         /* Driver Buttons */
 
@@ -166,11 +168,6 @@ public class RobotContainer {
                 "Feature Test interface is disabled. Enable in Constants.DriverConstants.enableFeatureTest"
             )));
         }
-
-        // Non-interface buttons
-        new JoystickButton(driver, 7)
-            .and(notInterface)
-            .onTrue(new InstantCommand(() -> System.out.println("Base btn 7")));
     }
 
     /**
@@ -179,6 +176,12 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
+        SmartDashboard.updateValues();
+
+        PathPlannerAuto auto = new PathPlannerAuto("a_test01");
+
+        return auto;
+
         // An ExampleCommand will run in autonomous
         /*
         // Read Inputs from Shuffleboard
@@ -219,6 +222,6 @@ public class RobotContainer {
         
         return new exampleAuto(s_Swerve, startPose, endPose, waypoints);
         */
-        return new exampleAuto(s_Swerve); //(HARD CODED TRAJECTORY)
+        // return new exampleAuto(s_Swerve); //(HARD CODED TRAJECTORY)
     }
 }

@@ -22,7 +22,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final RelativeEncoder elev_encoder = leftMotor.getEncoder();
 
   // Claw Motor and Encoder
-  private final SparkMax clawMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
+  private final SparkMax clawMotor = new SparkMax(ElevatorConstants.clawMotorID, MotorType.kBrushless);
   private final RelativeEncoder claw_encoder = leftMotor.getEncoder();
 
   // Motion Controllers
