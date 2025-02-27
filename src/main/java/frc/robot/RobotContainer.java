@@ -50,6 +50,7 @@ public class RobotContainer {
     private final LimelightConfig s_LimelightConfig = new LimelightConfig();
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
+    private final WristSubsystem s_wrist = new WristSubsystem();
 
     /* Elevator Control Buttons */
     private final JoystickButton elevatorButton1 = new JoystickButton(driver, 7);  // Assign buttons
@@ -86,12 +87,6 @@ public class RobotContainer {
                 () -> aimAssist.getAsBoolean()
             )
         );
-        s_Elevator.setDefaultCommand(
-            new RunCommand(
-                () -> s_Elevator.updateElevator(), 
-                s_Elevator
-            )
-        );
 
         // Configure the button bindings
         configureButtonBindings();
@@ -106,11 +101,12 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_1));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_2));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_3));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_4));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, ElevatorConstants.ELEVATOR_SETPOINT_5));
+        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 0, 0));
+        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 1, 1));
+        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 2, 2));
+        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 3, 3));
+        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 4, 4));
+    
         
         /* Driver Buttons */
 

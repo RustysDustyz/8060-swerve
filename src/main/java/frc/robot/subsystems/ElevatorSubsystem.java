@@ -1,130 +1,92 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
+    private final SparkMax leftMotor;
+    private final SparkMax rightMotor;
+    private final Encoder encoder;
+    private final PIDController pidController;
 
-  // elevator Motors & Encoder
-  private final SparkMax leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
-  private final SparkMax rightMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
-  private final RelativeEncoder elev_encoder = leftMotor.getEncoder();
+    // Heights in meters (adjust based on testing)
+    private static final double[] HEIGHTS = {
+      0.0,       // Ground level
+      0.1,       // First level
+      0.3,       // Second level
+      0.6,       // Third level
+      0.9,       // Fourth level
+      1.2        // Fifth level
+    };
 
-  // Claw Motor and Encoder
-  private final SparkMax clawMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
-  private final RelativeEncoder claw_encoder = leftMotor.getEncoder();
+    // Error margin (tolerance) in meters
+    private static final double ERROR_MARGIN = 0.01; // 1 cm tolerance
 
-  // Motion Controllers
-  private final ProfiledPIDController m_controller = 
-      new ProfiledPIDController(ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD, 
-                                ElevatorConstants.CONSTRAINTS, 0.02);
-  private final ElevatorFeedforward m_feedforward = 
-      new ElevatorFeedforward(ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV);
+    // PID gains (tune based on testing)
+    private static final double kP = 0.01;
+    private static final double kI = 0.0;
+    private static final double kD = 0.0;
 
-  public ElevatorSubsystem() {
-  
-    SparkMaxConfig globalConfig = new SparkMaxConfig();
-    SparkMaxConfig rightConfig = new SparkMaxConfig();
+    public ElevatorSubsystem() {
+      leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
+      rightMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
+      encoder = new Encoder(ElevatorConstants.encoderChannelA, ElevatorConstants.encoderChannelB);
 
-    
-    globalConfig
-        .smartCurrentLimit(50)
-        .idleMode(IdleMode.kBrake)
-        .encoder
+      pidController = new PIDController(kP, kI, kD);
+        
+      SparkMaxConfig globalConfig = new SparkMaxConfig();
+      SparkMaxConfig rightConfig = new SparkMaxConfig();
+      SparkMaxConfig encoderConfig = new SparkMaxConfig();
+
+      
+      globalConfig
+          .smartCurrentLimit(50)
+          .idleMode(IdleMode.kBrake);
+
+      // Apply the global config and invert since it is on the opposite side
+      rightConfig
+          .apply(globalConfig)
+          .inverted(true)
+          .follow(leftMotor);
+
+      encoderConfig.encoder
           .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
-          .velocityConversionFactor(getElevatorPositionMeters() / 60);
-
-    // Apply the global config and invert since it is on the opposite side
-    rightConfig
-        .apply(globalConfig)
-        .inverted(true)
-        .follow(leftMotor);
-        
-    /*
-     * Apply the configuration to the SPARKs.
-     *
-     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-     * is useful in case the SPARK MAX is replaced.
-     *
-     * kPersistParameters is used to ensure the configuration is not lost when
-     * the SPARK MAX loses power. This is useful for power cycles that may occur
-     * mid-operation.
-     */
-    leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    /* */
-    SparkMaxConfig clawConfig = new SparkMaxConfig();
-        clawConfig
-            .smartCurrentLimit(20) // Adjust as needed
-            .idleMode(IdleMode.kBrake)
-            .encoder.positionConversionFactor(ElevatorConstants.CLAW_CONVERSION_FACTOR);
-        
-    clawMotor.configure(clawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-  }
-
-  public double getElevatorPositionMeters() {
-    return elev_encoder.getPosition(); 
-  }
-
-  public double getElevatorVelocityMetersPerSecond() {
-    return elev_encoder.getVelocity();
-  }
-
-  public void setElevatorGoal(double goal) {
-    m_controller.setGoal(goal);
-  }
-  
-  public void updateElevator() {
-    double output = m_controller.calculate(getElevatorPositionMeters())
-                    + m_feedforward.calculate(m_controller.getSetpoint().velocity);
-    
-    // Clamp output to safe voltage range
-    output = Math.max(Math.min(output, 12), -12);
-    //rightMotor.setVoltage(output); // Follower automatically follows lead motor
-
-    // Stop motor when within 1 cm of goal
-    if (Math.abs(m_controller.getGoal().position - getElevatorPositionMeters()) < 0.01) {
-        stopElevator();
+          .velocityConversionFactor(ElevatorConstants.CONVERSION_FACTOR / 60);
+          
+      /*
+      * Apply the configuration to the SPARKs.
+      *
+      * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+      * is useful in case the SPARK MAX is replaced.
+      *
+      * kPersistParameters is used to ensure the configuration is not lost when
+      * the SPARK MAX loses power. This is useful for power cycles that may occur
+      * mid-operation.
+      */
+      leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
-  }
 
-  public void stopElevator() {
-    rightMotor.setVoltage(0);
-  }
+    public void setHeight(int heightIndex) {
+      if (heightIndex < 0 || heightIndex >= HEIGHTS.length) return;
+      double targetPosition = HEIGHTS[heightIndex];
+      double output = pidController.calculate(encoder.getDistance(), targetPosition);
+      leftMotor.set(output);
+    }
 
-  /** Gets the current claw angle (in degrees or radians) */
-  public double getClawAngle() {
-    return claw_encoder.getPosition();
-  }
+    public boolean isAtHeight(int heightIndex) {
+      return Math.abs(encoder.getDistance() - HEIGHTS[heightIndex]) < ERROR_MARGIN;
+    }
 
-  /** Sets the desired claw angle */
-  public void setClawGoal(double goal) {
-      // clawController.setGoal(goal);
-  }
-
-
-  /** Stops the claw */
-  public void stopClaw() {
-      clawMotor.setVoltage(0);
-  }
-  
-
-  @Override
-  public void periodic() {
-    // Display encoder readings on SmartDashboard
-    SmartDashboard.putNumber("Elevator Height (m)", getElevatorPositionMeters());
-    SmartDashboard.putNumber("Elevator Velocity (m/s)", getElevatorVelocityMetersPerSecond());
-  }
+    public void stop() {
+      leftMotor.set(0);
+   }
 }

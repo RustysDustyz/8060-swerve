@@ -174,6 +174,12 @@ public final class Constants {
         /* Motor IDs */
         public static final int rightMotorID = 1; 
         public static final int leftMotorID = 9;
+        public static final int wristMotorID = 3;
+
+        /* Encoder Channel */
+
+        public static final int encoderChannelA = 0;
+        public static final int encoderChannelB = 1;
 
         /* Gear Ratio & Pulley System */
         public static final double GEAR_RATIO = 60.0;  // 1:60 gearbox
@@ -198,13 +204,12 @@ public final class Constants {
         public static final double kV = 1.3;
 
         /* Elevator Setpoints (in meters) */
-        public static final double ELEVATOR_SETPOINT_1 = 0.1;  // Example Low Position
-        public static final double ELEVATOR_SETPOINT_2 = 0.3;  // Mid-Low
-        public static final double ELEVATOR_SETPOINT_3 = 0.6;  // Mid
-        public static final double ELEVATOR_SETPOINT_4 = 0.9;  // Mid-High
-        public static final double ELEVATOR_SETPOINT_5 = 1.2;  // Max Height
+        public static final double ELEVATOR_SETPOINT_1 = 0.1;
+        public static final double ELEVATOR_SETPOINT_2 = 0.3;
+        public static final double ELEVATOR_SETPOINT_3 = 0.6;
+        public static final double ELEVATOR_SETPOINT_4 = 0.9;
+        public static final double ELEVATOR_SETPOINT_5 = 1.2;
 
-        public static final double CLAW_CONVERSION_FACTOR = 1;
     }
 
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
