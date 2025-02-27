@@ -24,13 +24,6 @@ public final class Constants {
          * Give the robot LOTS of clearance (don't run SysID inside).
          */
         public static final boolean enableSysID = false;
-
-        /**
-         * The Feature Test button is an interface for testing expiremental features;
-         * see: {@link RobotContainer.featureTestMode}.
-         * Bind test features in {@link RobotContainer.configureButtonBindings}
-         */
-        public static final boolean enableFeatureTest = true;
     }
 
     public static final class SwerveConstants {

@@ -1,21 +1,28 @@
 package frc.robot;
 
-import com.ctre.phoenix6.controls.MusicTone;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import java.io.IOException;
+import java.nio.file.Path;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -43,13 +50,12 @@ public class RobotContainer {
     private final JoystickButton rotAssist = new JoystickButton(driver, 3);
     private final JoystickButton transAssist = new JoystickButton(driver, 4);
 
-    private final JoystickButton sysidInterface = new JoystickButton(driver, 3);
-    private final JoystickButton featureTestInterface = new JoystickButton(driver, 4);
+    private final JoystickButton sysidInterface = new JoystickButton(driver, 2);
     
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
-    private final Trigger notInterface = sysidInterface.or(featureTestInterface).negate();
+    private final Trigger notSysID = sysidInterface.negate();
 
 
     /* Subsystems */
@@ -119,11 +125,11 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+        elevatorButton1.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
+        elevatorButton2.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
+        elevatorButton3.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
+        elevatorButton4.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
+        elevatorButton5.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
 
         /* Driver Buttons */
 
@@ -150,35 +156,6 @@ public class RobotContainer {
                 "SysID interface is disabled. Enable in Constants.DriverConstants.enableSysID"
             )));
         }
-
-        if(DriverConstants.enableFeatureTest){
-            // Feature Test - Move test : Press Btn 4 + 7 to start
-            featureTestInterface
-                .and(new JoystickButton(driver, 7))
-                .onTrue(
-                    new RunCommand(
-                        () -> {for(SwerveModule m : s_Swerve.getModules()){
-                            m.getDriveMotor().set(0.25);
-                        }}
-                    ).until(new JoystickButton(driver, 7).negate())
-                );
-
-            // Feature Test - Reset motor optimization : Press Btn 4 + 8 to start
-            featureTestInterface
-                .and(new JoystickButton(driver, 8))
-                .onTrue(
-                    new InstantCommand(
-                        () -> {for(SwerveModule m : s_Swerve.getModules()){
-                            m.getDriveMotor().setControl(new MusicTone(880));
-                            m.resetOptimization();
-                        }}
-                    )
-                );
-        }else{
-            featureTestInterface.onTrue(new InstantCommand(() -> System.out.println(
-                "Feature Test interface is disabled. Enable in Constants.DriverConstants.enableFeatureTest"
-            )));
-        }
     }
 
     /**
@@ -190,7 +167,71 @@ public class RobotContainer {
         //SmartDashboard.updateValues();
 
         // return autoChooser.getSelected();
+        
+        try{
+            Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(
+                Filesystem.getDeployDirectory().toPath().resolve(Path.of("pathplanner/paths/p_test01.path"))
+            );
+            
+            AutoBuilder.configure(
+                s_Swerve::getPose,
+                s_Swerve::setPose,
+                s_Swerve::getChassisSpeeds,
+                (speeds, feedforwards) -> s_Swerve.drive(speeds.times(0.5)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                new PPHolonomicDriveController(
+                    new PIDConstants(
+                        Constants.SwerveConstants.driveKP, 
+                        Constants.SwerveConstants.driveKI,
+                        Constants.SwerveConstants.driveKD
+                    ),
+                    new PIDConstants(
+                        Constants.SwerveConstants.angleKP, 
+                        Constants.SwerveConstants.angleKI, 
+                        Constants.SwerveConstants.angleKD
+                    )
+                ),
+                Robot.robotConfig, // The robot configuration
+                () -> {
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+                },
+                s_Swerve
+            );
+
+            ProfiledPIDController thetaController =
+            new ProfiledPIDController(
+                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+            thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+            SwerveControllerCommand scc = new SwerveControllerCommand(
+                trajectory,
+                s_Swerve::getPose,
+                Constants.SwerveConstants.swerveKinematics,
+                new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+                new PIDController(Constants.AutoConstants.kPYController, 0, 0),
+                thetaController,
+                s_Swerve::setModuleStates,
+                s_Swerve
+            );
+
+            return scc;
+            /*if(resetOdomtry){
+                return new SequentialCommandGroup(
+                    new InstantCommand(() -> s_Swerve.setPose(trajectory.getInitialPose()))
+                );
+            } else {
+                return scc;
+            }*/
+        }catch(IOException e){
+            DriverStation.reportError("Could not load trajectory.", e.getStackTrace());
+            return new InstantCommand();
+        }
+        /*
         PathPlannerAuto auto = new PathPlannerAuto("a_test01");
         return auto;
+        */
     }
 }
