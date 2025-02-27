@@ -79,7 +79,7 @@ public class Swerve extends SubsystemBase {
         double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
         double rotationSpeed = tx * kP_rot * Constants.SwerveConstants.maxAngularVelocity;
         
-        return -rotationSpeed;
+        return rotationSpeed;
     }
 
     public Translation2d fwd_aimAssist(){
@@ -113,13 +113,13 @@ public class Swerve extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    -rotation, 
+                                    rotation, 
                                     getHeading()
                                 )
                                 : new ChassisSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    -rotation)
+                                    rotation)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.SwerveConstants.maxSpeed);
 

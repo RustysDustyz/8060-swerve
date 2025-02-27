@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +31,7 @@ public class RobotContainer {
     private final int translationAxis = XboxController.Axis.kLeftY.value;
     private final int strafeAxis = XboxController.Axis.kLeftX.value;
     private final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
+    private final int wristIO = XboxController.Axis.kRightY.value;
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
@@ -46,11 +48,12 @@ public class RobotContainer {
 
     private final Trigger notInterface = sysidInterface.or(featureTestInterface).negate();
 
+
     /* Subsystems */
     private final LimelightConfig s_LimelightConfig = new LimelightConfig();
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
-    private final WristSubsystem s_wrist = new WristSubsystem();
+    private final WristSubsystem s_Wrist = new WristSubsystem();
 
     /* Elevator Control Buttons */
     private final JoystickButton elevatorButton1 = new JoystickButton(driver, 7);  // Assign buttons
@@ -80,11 +83,18 @@ public class RobotContainer {
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
-                () -> -driver.getRawAxis(translationAxis), 
-                () -> -driver.getRawAxis(strafeAxis), 
-                () -> -driver.getRawAxis(rotationAxis), 
+                () -> driver.getRawAxis(translationAxis), 
+                () -> driver.getRawAxis(strafeAxis), 
+                () -> driver.getRawAxis(rotationAxis), 
                 () -> robotCentric.getAsBoolean(),
                 () -> aimAssist.getAsBoolean()
+            )
+        );
+
+        s_Wrist.setDefaultCommand(
+            new IOCommand(
+                s_Wrist,
+                () -> -driver.getRawAxis(wristIO)
             )
         );
 
@@ -101,13 +111,12 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 0, 0));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 1, 1));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 2, 2));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 3, 3));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, s_wrist, 4, 4));
-    
-        
+        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
+        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
+        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
+        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
+        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+
         /* Driver Buttons */
 
         // Zero Gyro : Press or hold Btn 6 to reset heading
