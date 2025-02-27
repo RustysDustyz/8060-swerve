@@ -47,4 +47,8 @@ public class WristSubsystem extends SubsystemBase {
     public void stop() {
         wristMotor.set(0);
     }
+
+    public void moveWrist(double speed) {
+        wristMotor.set(speed);
+    }
 }
