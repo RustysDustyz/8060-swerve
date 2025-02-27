@@ -66,6 +66,31 @@ public class SwerveModule {
         lastDesiredState = desiredState;
     }
 
+    private void optimize_t(SwerveModuleState desiredState) {
+        if (lastDesiredState == null) {
+            lastDesiredState = desiredState;
+            return;
+        }
+    
+        double currentAngle = lastDesiredState.angle.getDegrees();  
+        double targetAngle = desiredState.angle.getDegrees();
+    
+        // Compute shortest path for the angle motor (normalize to [-180, 180] range)
+        double deltaAngle = ((targetAngle - currentAngle + 180) % 360) - 180;
+    
+        // Check if flipping the wheel direction is beneficial
+        boolean reverseWheelDirection = Math.abs(deltaAngle) > 90;
+        if (reverseWheelDirection) {
+            targetAngle = (targetAngle + 180) % 360; // Flip angle by 180 degrees
+            desiredState.speedMetersPerSecond *= -1; // Reverse wheel speed
+        }
+    
+        // Set optimized angle
+        desiredState = new SwerveModuleState(desiredState.speedMetersPerSecond, Rotation2d.fromDegrees(targetAngle));
+        
+        lastDesiredState = desiredState;
+    }
+
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
         this.angleOffset = moduleConstants.angleOffset;
