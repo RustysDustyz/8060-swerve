@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -111,17 +110,17 @@ public class Swerve extends SubsystemBase {
     }
 
     public double rotAimAssist(){
-        double kP_rot = 0.035; // Tune this value based on testing
+        double kP_rot = 0.001; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
         double rotationSpeed = tx * kP_rot * Constants.SwerveConstants.maxAngularVelocity;
         
-        return -rotationSpeed;
+        return rotationSpeed;
     }
 
     public Translation2d fwdAimAssist(){
-        double kP_fwd = 0.1; // Tune this value based on testing
+        double kP_fwd = 0.02; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double ty = LimelightHelpers.getTY("limelight"); // Horizontal error
@@ -165,13 +164,13 @@ public class Swerve extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    -rotation, 
+                                    rotation, 
                                     getHeading()
                                 )
                                 : new ChassisSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    -rotation)
+                                    rotation)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.SwerveConstants.maxSpeed);
 
