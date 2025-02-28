@@ -38,7 +38,8 @@ public class RobotContainer {
     private final JoystickButton translationMode = new JoystickButton(driver, 1);
 
     // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
-    private final JoystickButton aimAssist = new JoystickButton(driver, 2);
+    private final JoystickButton rotAssist = new JoystickButton(driver, 3);
+    private final JoystickButton transAssist = new JoystickButton(driver, 4);
 
     private final JoystickButton sysidInterface = new JoystickButton(driver, 3);
     private final JoystickButton featureTestInterface = new JoystickButton(driver, 4);
@@ -87,7 +88,8 @@ public class RobotContainer {
                 () -> driver.getRawAxis(strafeAxis), 
                 () -> driver.getRawAxis(rotationAxis), 
                 () -> robotCentric.getAsBoolean(),
-                () -> aimAssist.getAsBoolean()
+                () -> rotAssist.getAsBoolean(),
+                () -> transAssist.getAsBoolean()
             )
         );
 

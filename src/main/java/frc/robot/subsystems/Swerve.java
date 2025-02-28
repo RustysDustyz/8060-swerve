@@ -109,6 +109,8 @@ public class Swerve extends SubsystemBase {
         return Constants.SwerveConstants.swerveKinematics.toChassisSpeeds(getModuleStates());
     }
 
+    
+
     public double rotAimAssist(){
         double kP_rot = 0.001; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
@@ -119,14 +121,21 @@ public class Swerve extends SubsystemBase {
         return rotationSpeed;
     }
 
-    public Translation2d fwdAimAssist(){
-        double kP_fwd = 0.02; // Tune this value based on testing
+    public Translation2d transAimAssist(){
+        double kP_trans = 0.02; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
-        double ty = LimelightHelpers.getTY("limelight"); // Horizontal error
-        double forwardSpeed = ty * kP_fwd * Constants.SwerveConstants.maxSpeed;
+        Pose2d aprilTagPose = LimelightHelpers.getBotPose2d("limelight"); // Horizontal error
+        double rightOffset = 2.5 * 0.0254; // 2.5 inches to meters
+        double frontOffset = 14 * 0.0254;  // 14 inches to meters
+
+        // Calculate the desired translation
+        Translation2d desiredTranslation = new Translation2d(
+            (aprilTagPose.getX() + frontOffset) * kP_trans,
+            (aprilTagPose.getY() + rightOffset) * kP_trans
+        );
         
-        return new Translation2d(forwardSpeed, 0);
+        return desiredTranslation;
     }
 
     public void toggleTransMode(){
@@ -144,20 +153,25 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean aimAssist) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean rotAssist, boolean transAssist) {
         //System.out.println(translation);
 
-        if (aimAssist) {
+        if (rotAssist) {
             rotation = rotAimAssist();
-            translation = fwdAimAssist();
 
             System.out.println(rotation = rotAimAssist());
-            System.out.println(translation = fwdAimAssist());
-            // we could also do this:
-            // translation = translation.plus(fwd_aimAssist());
             fieldRelative = false; // Disable field-relative while aiming
         }
 
+        if (transAssist) {
+            translation = transAimAssist();
+
+            System.out.println(translation = transAimAssist());
+            // we could also do this:
+            // translation = translation.plus(trans_aimAssist());
+            fieldRelative = false; // Disable field-relative while aiming
+        }
+        
         if(transMode) rotation = 0;
         SwerveModuleState[] swerveModuleStates =
             Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(

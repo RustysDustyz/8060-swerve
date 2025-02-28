@@ -73,8 +73,10 @@ public class ElevatorSubsystem extends SubsystemBase {
       */
       leftMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
       rightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    }
 
+      encoder.reset();
+    }
+    
     public void setHeight(int heightIndex) {
       if (heightIndex < 0 || heightIndex >= HEIGHTS.length) return;
       double targetPosition = HEIGHTS[heightIndex];

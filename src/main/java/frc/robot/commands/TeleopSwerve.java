@@ -18,10 +18,10 @@ public class TeleopSwerve extends Command {
     private DoubleSupplier strafeSup;
     private DoubleSupplier rotationSup;
     private BooleanSupplier robotCentricSup;
-    private final BooleanSupplier aimAssist;
+    private final BooleanSupplier rotAssist, transAssist;
     private final SlewRateLimiter translationLimiter, strafeLimiter, rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier aimAssist) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier rotAssist, BooleanSupplier transAssist) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -29,7 +29,8 @@ public class TeleopSwerve extends Command {
         this.strafeSup = strafeSup;
         this.rotationSup = rotationSup;
         this.robotCentricSup = robotCentricSup;
-        this.aimAssist = aimAssist;
+        this.rotAssist = rotAssist;
+        this.transAssist = transAssist;
 
         // Initialize slew rate limiters for x, y, and turning speeds
         this.translationLimiter = new SlewRateLimiter(Constants.SwerveConstants.maxAccel);
@@ -56,7 +57,8 @@ public class TeleopSwerve extends Command {
             rotationVal * Constants.SwerveConstants.maxAngularVelocity, 
             !robotCentricSup.getAsBoolean(), 
             true,
-            aimAssist.getAsBoolean()
+            rotAssist.getAsBoolean(),
+            transAssist.getAsBoolean()
         );
     }
 }

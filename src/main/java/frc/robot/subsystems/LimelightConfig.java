@@ -24,7 +24,7 @@ public class LimelightConfig extends SubsystemBase{
         );
 
         // Configure AprilTag detection
-        LimelightHelpers.SetFiducialIDFiltersOverride("", new int[]{1, 2, 3, 4}); // Only track these tag IDs
+        LimelightHelpers.SetFiducialIDFiltersOverride("", new int[]{1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 21,22}); // Only track these tag IDs
     }
     
 }
