@@ -1,11 +1,13 @@
 package frc.robot;
 
 import com.ctre.phoenix6.controls.MusicTone;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -63,9 +65,13 @@ public class RobotContainer {
     private final JoystickButton elevatorButton4 = new JoystickButton(driver, 10);
     private final JoystickButton elevatorButton5 = new JoystickButton(driver, 11);
 
+    private final SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser(); // Build the auto chooser
+
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+
+        SmartDashboard.putData("Auto Mode", autoChooser);
 
         // SmartDashboard Inputs
         SmartDashboard.putNumber("startX", 0.5);
@@ -182,6 +188,8 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         //SmartDashboard.updateValues();
+
+        // return autoChooser.getSelected();
         PathPlannerAuto auto = new PathPlannerAuto("a_test01");
         return auto;
     }
