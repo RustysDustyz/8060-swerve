@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "p_test01"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "bezier1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "p_test02"
+            "pathName": "bezier2"
           }
         }
       ]

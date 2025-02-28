@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
@@ -80,18 +81,18 @@ public class Swerve extends SubsystemBase {
             this::getPose,
             this::setPose,
             this::getChassisSpeeds,
-            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            (speeds, feedforwards) -> drive(speeds.times(AutoConstants.speedFactor)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController(
-                    new PIDConstants(
-                        Constants.SwerveConstants.driveKP, 
-                        Constants.SwerveConstants.driveKI,
-                        Constants.SwerveConstants.driveKD
-                    ),
-                    new PIDConstants(
-                        Constants.SwerveConstants.angleKP, 
-                        Constants.SwerveConstants.angleKI, 
-                        Constants.SwerveConstants.angleKD
-                    )
+                new PIDConstants(
+                    Constants.SwerveConstants.driveKP, 
+                    Constants.SwerveConstants.driveKI,
+                    Constants.SwerveConstants.driveKD
+                ),
+                new PIDConstants(
+                    Constants.SwerveConstants.angleKP, 
+                    Constants.SwerveConstants.angleKI, 
+                    Constants.SwerveConstants.angleKD
+                )
             ),
             Robot.robotConfig, // The robot configuration
             () -> {
@@ -159,14 +160,14 @@ public class Swerve extends SubsystemBase {
         if (rotAssist) {
             rotation = rotAimAssist();
 
-            System.out.println(rotation = rotAimAssist());
+            //System.out.println(rotation = rotAimAssist());
             fieldRelative = false; // Disable field-relative while aiming
         }
 
         if (transAssist) {
             translation = transAimAssist();
 
-            System.out.println(translation = transAimAssist());
+            //System.out.println(translation = transAimAssist());
             // we could also do this:
             // translation = translation.plus(trans_aimAssist());
             fieldRelative = false; // Disable field-relative while aiming
@@ -176,16 +177,16 @@ public class Swerve extends SubsystemBase {
         SwerveModuleState[] swerveModuleStates =
             Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation, 
-                                    getHeading()
-                                )
-                                : new ChassisSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation)
-                                );
+                    translation.getX(), 
+                    translation.getY(), 
+                    rotation, 
+                    getHeading()
+                )
+                : new ChassisSpeeds(
+                    translation.getX(), 
+                    translation.getY(), 
+                    rotation)
+                );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.SwerveConstants.maxSpeed);
 
         for(SwerveModule mod : mSwerveMods){
@@ -273,21 +274,11 @@ public class Swerve extends SubsystemBase {
 
     public Command getDriveDynamTest(){
         return m_driveSysIdRoutine.dynamic(SysIdRoutine.Direction.kForward);
-    }
-
-    
+    }    
 
     @Override
     public void periodic(){
         swerveOdometry.update(getGyroYaw(), getModulePositions());
         publisher.set(getModuleStates());
-
-        /*
-        for(SwerveModule mod : mSwerveMods){
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", mod.getCANcoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
-        }
-        */
     }
 }

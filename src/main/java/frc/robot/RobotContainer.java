@@ -1,24 +1,16 @@
 package frc.robot;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import com.ctre.phoenix6.controls.MusicTone;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryUtil;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -71,21 +63,20 @@ public class RobotContainer {
     private final JoystickButton elevatorButton4 = new JoystickButton(driver, 10);
     private final JoystickButton elevatorButton5 = new JoystickButton(driver, 11);
 
-    private final SendableChooser<Command> autoChooser = AutoBuilder.buildAutoChooser(); // Build the auto chooser
-
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-
-        SmartDashboard.putData("Auto Mode", autoChooser);
-
         // SmartDashboard Inputs
+        SmartDashboard.putString("autoCommand", "test_elev");
+
+        /*
         SmartDashboard.putNumber("startX", 0.5);
         SmartDashboard.putNumber("startY", 0.5);
         SmartDashboard.putNumber("startTheta", 0.0);
         SmartDashboard.putNumber("endX", 1.0);
         SmartDashboard.putNumber("endY", 1.0);
         SmartDashboard.putNumber("endTheta", 0.0);
+        */
         
         // Add Waypoint Entries to SmartDashboard
         /*for (int i = 0; i<5; i++) {
@@ -123,6 +114,16 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+
+        /* Named Commands (Auto) */
+        NamedCommands.registerCommand("elevator0", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
+        NamedCommands.registerCommand("elevator1", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
+        NamedCommands.registerCommand("elevator2", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
+        NamedCommands.registerCommand("elevator3", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
+        NamedCommands.registerCommand("elevator4", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+        NamedCommands.registerCommand("rotAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, false)).withTimeout(1));
+        NamedCommands.registerCommand("transAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, false, true)).withTimeout(1));
+        NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
         
         /* Elevator Setpoints */
         elevatorButton1.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
@@ -164,74 +165,8 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        //SmartDashboard.updateValues();
-
-        // return autoChooser.getSelected();
-        
-        try{
-            Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(
-                Filesystem.getDeployDirectory().toPath().resolve(Path.of("pathplanner/paths/p_test01.path"))
-            );
-            
-            AutoBuilder.configure(
-                s_Swerve::getPose,
-                s_Swerve::setPose,
-                s_Swerve::getChassisSpeeds,
-                (speeds, feedforwards) -> s_Swerve.drive(speeds.times(0.5)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-                new PPHolonomicDriveController(
-                    new PIDConstants(
-                        Constants.SwerveConstants.driveKP, 
-                        Constants.SwerveConstants.driveKI,
-                        Constants.SwerveConstants.driveKD
-                    ),
-                    new PIDConstants(
-                        Constants.SwerveConstants.angleKP, 
-                        Constants.SwerveConstants.angleKI, 
-                        Constants.SwerveConstants.angleKD
-                    )
-                ),
-                Robot.robotConfig, // The robot configuration
-                () -> {
-                var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
-                return false;
-                },
-                s_Swerve
-            );
-
-            ProfiledPIDController thetaController =
-            new ProfiledPIDController(
-                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
-            thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-            SwerveControllerCommand scc = new SwerveControllerCommand(
-                trajectory,
-                s_Swerve::getPose,
-                Constants.SwerveConstants.swerveKinematics,
-                new PIDController(Constants.AutoConstants.kPXController, 0, 0),
-                new PIDController(Constants.AutoConstants.kPYController, 0, 0),
-                thetaController,
-                s_Swerve::setModuleStates,
-                s_Swerve
-            );
-
-            return scc;
-            /*if(resetOdomtry){
-                return new SequentialCommandGroup(
-                    new InstantCommand(() -> s_Swerve.setPose(trajectory.getInitialPose()))
-                );
-            } else {
-                return scc;
-            }*/
-        }catch(IOException e){
-            DriverStation.reportError("Could not load trajectory.", e.getStackTrace());
-            return new InstantCommand();
-        }
-        /*
-        PathPlannerAuto auto = new PathPlannerAuto("a_test01");
+        SmartDashboard.updateValues();
+        PathPlannerAuto auto = new PathPlannerAuto(SmartDashboard.getString("autoCommand", "test_bezier"));
         return auto;
-        */
     }
 }

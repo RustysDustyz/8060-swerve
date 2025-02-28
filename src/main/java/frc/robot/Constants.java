@@ -165,8 +165,8 @@ public final class Constants {
         public static final boolean implemented = false; // Set to true since it's now integrated
 
         /* Motor IDs */
-        public static final int rightMotorID = 9; 
-        public static final int leftMotorID = 10;
+        public static final int rightMotorID = 1; 
+        public static final int leftMotorID = 2;
         public static final int wristMotorID = 11;
 
         /* Encoder Channel */
@@ -210,6 +210,9 @@ public final class Constants {
         public static final double kMaxAccelerationMetersPerSecondSquared = 0.2;
         public static final double kMaxAngularSpeedRadiansPerSecond = 0.2;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.2;
+        // The speed at which the robot drives during autonomous mode in comparison to in
+        // teleoperated mode.
+        public static final double speedFactor = 0.06;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;
