@@ -4,13 +4,17 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants.SwerveConstants.CameraConstants;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -20,6 +24,7 @@ import frc.robot.Constants.SwerveConstants.CameraConstants;
  */
 public class Robot extends TimedRobot {
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
+  public static RobotConfig robotConfig;
 
   private Command m_autonomousCommand;
 
@@ -32,7 +37,13 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
+    // autonomous chooser on the dashboard.`
+    try {
+      robotConfig = RobotConfig.fromGUISettings();
+    } catch (IOException | ParseException e) {
+      e.printStackTrace();
+    }
+    //CameraServer.startAutomaticCapture();
     m_robotContainer = new RobotContainer();
   }
 

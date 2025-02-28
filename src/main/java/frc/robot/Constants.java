@@ -172,9 +172,9 @@ public final class Constants {
         public static final boolean implemented = false; // Set to true since it's now integrated
 
         /* Motor IDs */
-        public static final int rightMotorID = 1; 
-        public static final int leftMotorID = 9;
-        public static final int wristMotorID = 3;
+        public static final int rightMotorID = 9; 
+        public static final int leftMotorID = 10;
+        public static final int wristMotorID = 11;
 
         /* Encoder Channel */
 

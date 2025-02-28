@@ -3,12 +3,16 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+import frc.robot.Robot;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +22,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.units.BaseUnits;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -70,10 +75,42 @@ public class Swerve extends SubsystemBase {
         swerveOdometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroYaw(), getModulePositions());
         publisher = NetworkTableInstance.getDefault()
         .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+
+        AutoBuilder.configure(
+            this::getPose,
+            this::setPose,
+            this::getChassisSpeeds,
+            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPHolonomicDriveController(
+                    new PIDConstants(
+                        Constants.SwerveConstants.driveKP, 
+                        Constants.SwerveConstants.driveKI,
+                        Constants.SwerveConstants.driveKD
+                    ),
+                    new PIDConstants(
+                        Constants.SwerveConstants.angleKP, 
+                        Constants.SwerveConstants.angleKI, 
+                        Constants.SwerveConstants.angleKD
+                    )
+            ),
+            Robot.robotConfig, // The robot configuration
+            () -> {
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this
+        );
     }
 
-    public double rot_aimAssist(){
-        double kP_rot = 0.035; // Tune this value based on testing
+    public ChassisSpeeds getChassisSpeeds(){
+        return Constants.SwerveConstants.swerveKinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    public double rotAimAssist(){
+        double kP_rot = 0.001; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
@@ -82,8 +119,8 @@ public class Swerve extends SubsystemBase {
         return rotationSpeed;
     }
 
-    public Translation2d fwd_aimAssist(){
-        double kP_fwd = 0.1; // Tune this value based on testing
+    public Translation2d fwdAimAssist(){
+        double kP_fwd = 0.02; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double ty = LimelightHelpers.getTY("limelight"); // Horizontal error
@@ -96,12 +133,26 @@ public class Swerve extends SubsystemBase {
         transMode = !transMode;
     }
 
+    public void drive(ChassisSpeeds speeds){
+        SwerveModuleState[] swerveModuleStates =
+            Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.SwerveConstants.maxSpeed);
+
+        for(SwerveModule mod : mSwerveMods){
+            // set desired state
+            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], true);
+        }
+    }
+
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean aimAssist) {
         //System.out.println(translation);
 
         if (aimAssist) {
-            rotation = rot_aimAssist();
-            translation = fwd_aimAssist();
+            rotation = rotAimAssist();
+            translation = fwdAimAssist();
+
+            System.out.println(rotation = rotAimAssist());
+            System.out.println(translation = fwdAimAssist());
             // we could also do this:
             // translation = translation.plus(fwd_aimAssist());
             fieldRelative = false; // Disable field-relative while aiming

@@ -56,6 +56,7 @@ public class SwerveModule {
         if(Math.abs(valueDelta) > 180){
             rotationOffset -= Math.signum(valueDelta);
         }
+        
         double stateDelta = (desiredState.angle.getDegrees() + rotationOffset*360) - lastDesiredAngle;
         if(SwerveConstants.optimizeWheelReverse){
             if(Math.abs(stateDelta) > 90){

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.controls.MusicTone;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -13,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -171,11 +171,6 @@ public class RobotContainer {
                 "Feature Test interface is disabled. Enable in Constants.DriverConstants.enableFeatureTest"
             )));
         }
-
-        // Non-interface buttons
-        new JoystickButton(driver, 7)
-            .and(notInterface)
-            .onTrue(new InstantCommand(() -> System.out.println("Base btn 7")));
     }
 
     /**
@@ -184,46 +179,8 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // An ExampleCommand will run in autonomous
-        /*
-        // Read Inputs from Shuffleboard
-        SmartDashboard.updateValues();
-
-        Pose2d startPose = new Pose2d(
-            SmartDashboard.getNumber("startX", 0.5),
-            SmartDashboard.getNumber("startY", 0.5),
-            Rotation2d.fromDegrees(SmartDashboard.getNumber("startTheta", 0.0))
-        );
-        Pose2d endPose = new Pose2d(
-            SmartDashboard.getNumber("endX", 1.0),
-            SmartDashboard.getNumber("endY", 1.0),
-            Rotation2d.fromDegrees(SmartDashboard.getNumber("endTheta", 0.0))
-        );
-        System.out.print("start: ");
-        System.out.println(startPose);
-        System.out.print("end: ");
-        System.out.println(endPose);
-
-        // Program is prone to crash if start/end are too close in the path.
-        // If that is true, the program will return a null command instead.
-        if(startPose.getTranslation().getDistance(endPose.getTranslation()) < 0.01) return null;
-
-        List<Translation2d> waypoints = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            double x = SmartDashboard.getNumber("waypointX-%d".formatted(i), 0.0);
-            double y = SmartDashboard.getNumber("waypointY-%d".formatted(i), 0.0);
-
-            System.out.printf("w[%d]: ",i);
-            System.out.printf("Translation2d(X: %.2f, Y: %.2f)\n",x,y);
-
-            // Add non-zero waypoints to the trajectory
-            if (x != 0.0 || y != 0.0) {
-                waypoints.add(new Translation2d(x, y));
-            }
-        }
-        
-        return new exampleAuto(s_Swerve, startPose, endPose, waypoints);
-        */
-        return new exampleAuto(s_Swerve); //(HARD CODED TRAJECTORY)
+        //SmartDashboard.updateValues();
+        PathPlannerAuto auto = new PathPlannerAuto("a_test01");
+        return auto;
     }
 }
