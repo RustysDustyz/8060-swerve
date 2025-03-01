@@ -53,7 +53,7 @@ public class RobotContainer {
 
 
     /* Subsystems */
-    private final LimelightConfig s_LimelightConfig = new LimelightConfig();
+    private final LimelightConfig s_LimelightConfig;
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
     private final WristSubsystem s_Wrist = new WristSubsystem();
@@ -70,6 +70,7 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        s_LimelightConfig = new LimelightConfig();
 
         SmartDashboard.putData("Auto Mode", autoChooser);
 

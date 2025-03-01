@@ -36,30 +36,29 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double kD = 0.0;
 
     public ElevatorSubsystem() {
+      pidController = new PIDController(kP, kI, kD);
+        
       leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
       rightMotor = new SparkMax(ElevatorConstants.rightMotorID, MotorType.kBrushless);
       encoder = new Encoder(ElevatorConstants.encoderChannelA, ElevatorConstants.encoderChannelB);
-
-      pidController = new PIDController(kP, kI, kD);
-        
       SparkMaxConfig globalConfig = new SparkMaxConfig();
       SparkMaxConfig rightConfig = new SparkMaxConfig();
       SparkMaxConfig encoderConfig = new SparkMaxConfig();
 
       
       globalConfig
-          .smartCurrentLimit(50)
-          .idleMode(IdleMode.kBrake);
+        .inverted(true)
+        .idleMode(IdleMode.kCoast);
 
       // Apply the global config and invert since it is on the opposite side
       rightConfig
-          .apply(globalConfig)
-          .inverted(true)
-          .follow(leftMotor);
+        .idleMode(IdleMode.kCoast)
+        .follow(leftMotor)
+        .inverted(true);
 
       encoderConfig.encoder
-          .positionConversionFactor(ElevatorConstants.CONVERSION_FACTOR)
-          .velocityConversionFactor(ElevatorConstants.CONVERSION_FACTOR / 60);
+        .positionConversionFactor((Math.PI * 0.058) / 60.0)
+        .velocityConversionFactor(((Math.PI * 0.058) / 60.0) / 60);
           
       /*
       * Apply the configuration to the SPARKs.

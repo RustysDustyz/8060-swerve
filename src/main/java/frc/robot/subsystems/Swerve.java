@@ -116,6 +116,7 @@ public class Swerve extends SubsystemBase {
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
+        //System.out.printf("tx: %.2f\n",tx);
         double rotationSpeed = tx * kP_rot * Constants.SwerveConstants.maxAngularVelocity;
         
         return rotationSpeed;
@@ -134,7 +135,7 @@ public class Swerve extends SubsystemBase {
             (aprilTagPose.getX() + frontOffset) * kP_trans,
             (aprilTagPose.getY() + rightOffset) * kP_trans
         );
-        
+
         return desiredTranslation;
     }
 
@@ -159,14 +160,14 @@ public class Swerve extends SubsystemBase {
         if (rotAssist) {
             rotation = rotAimAssist();
 
-            System.out.println(rotation = rotAimAssist());
+            System.out.println(rotation);
             fieldRelative = false; // Disable field-relative while aiming
         }
 
         if (transAssist) {
             translation = transAimAssist();
 
-            System.out.println(translation = transAimAssist());
+            System.out.println(translation);
             // we could also do this:
             // translation = translation.plus(trans_aimAssist());
             fieldRelative = false; // Disable field-relative while aiming

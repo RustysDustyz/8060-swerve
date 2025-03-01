@@ -183,7 +183,7 @@ public final class Constants {
 
         /* Gear Ratio & Pulley System */
         public static final double GEAR_RATIO = 60.0;  // 1:60 gearbox
-        public static final double PULLEY_DIAMETER = 0.0381;  // 3.81 cm (1.5 inches)
+        public static final double PULLEY_DIAMETER = 0.0508;  // 3.81 cm (1.5 inches)
         public static final double PULLEY_CIRCUMFERENCE = Math.PI * PULLEY_DIAMETER;
         public static final double CONVERSION_FACTOR = PULLEY_CIRCUMFERENCE / GEAR_RATIO; // Meters per motor rotation
 
