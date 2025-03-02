@@ -22,6 +22,13 @@ public class ElevatorSetpointCommand extends Command {
     public void initialize() {
         elevator.setHeight(heightIndex);
         wrist.setAngle(angleIndex);
+
+        /*
+         *         // Start moving to the target height
+        new Thread(() -> {
+            elevator.moveToHeight(targetIndex);
+        }).start();
+         */
     }
 
     @Override
