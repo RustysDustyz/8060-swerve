@@ -50,11 +50,7 @@ public class RobotContainer {
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
-<<<<<<< HEAD
     private final Trigger notSysID = sysidInterface.negate();
-=======
-    private final Trigger notInterface = sysidInterface.negate();
->>>>>>> main
 
 
     /* Subsystems */
@@ -140,19 +136,11 @@ public class RobotContainer {
         NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
         
         /* Elevator Setpoints */
-<<<<<<< HEAD
         elevatorButton1.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
         elevatorButton2.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
         elevatorButton3.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
         elevatorButton4.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
         elevatorButton5.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
-=======
-        elevatorButton1.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
-        elevatorButton2.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
-        elevatorButton3.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
-        elevatorButton4.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
-        elevatorButton5.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
->>>>>>> main
 
         /* Driver Buttons */
 
