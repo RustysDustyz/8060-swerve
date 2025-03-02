@@ -5,7 +5,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -46,13 +44,12 @@ public class RobotContainer {
     private final JoystickButton rotAssist = new JoystickButton(driver, 3);
     private final JoystickButton transAssist = new JoystickButton(driver, 4);
 
-    private final JoystickButton sysidInterface = new JoystickButton(driver, 3);
-    private final JoystickButton featureTestInterface = new JoystickButton(driver, 4);
+    private final JoystickButton sysidInterface = new JoystickButton(driver, 2);
     
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
-    private final Trigger notInterface = sysidInterface.or(featureTestInterface).negate();
+    private final Trigger notInterface = sysidInterface.negate();
 
 
     /* Subsystems */
@@ -129,11 +126,11 @@ public class RobotContainer {
     private void configureButtonBindings() {
         
         /* Elevator Setpoints */
-        elevatorButton1.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
-        elevatorButton2.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
-        elevatorButton3.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
-        elevatorButton4.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
-        elevatorButton5.onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+        elevatorButton1.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
+        elevatorButton2.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
+        elevatorButton3.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
+        elevatorButton4.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
+        elevatorButton5.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
 
         /* Driver Buttons */
 
@@ -158,35 +155,6 @@ public class RobotContainer {
         }else{
             sysidInterface.onTrue(new InstantCommand(() -> System.out.println(
                 "SysID interface is disabled. Enable in Constants.DriverConstants.enableSysID"
-            )));
-        }
-
-        if(DriverConstants.enableFeatureTest){
-            // Feature Test - Move test : Press Btn 4 + 7 to start
-            featureTestInterface
-                .and(new JoystickButton(driver, 7))
-                .onTrue(
-                    new RunCommand(
-                        () -> {for(SwerveModule m : s_Swerve.getModules()){
-                            m.getDriveMotor().set(0.25);
-                        }}
-                    ).until(new JoystickButton(driver, 7).negate())
-                );
-
-            // Feature Test - Reset motor optimization : Press Btn 4 + 8 to start
-            featureTestInterface
-                .and(new JoystickButton(driver, 8))
-                .onTrue(
-                    new InstantCommand(
-                        () -> {for(SwerveModule m : s_Swerve.getModules()){
-                            m.getDriveMotor().setControl(new MusicTone(880));
-                            m.resetOptimization();
-                        }}
-                    )
-                );
-        }else{
-            featureTestInterface.onTrue(new InstantCommand(() -> System.out.println(
-                "Feature Test interface is disabled. Enable in Constants.DriverConstants.enableFeatureTest"
             )));
         }
     }
