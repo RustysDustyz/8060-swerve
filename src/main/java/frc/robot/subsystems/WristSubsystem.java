@@ -17,6 +17,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Error margin (tolerance) in motor rotations
     private static final double ERROR_MARGIN = 1.0; // Adjust as needed
+    private static final double MOTOR_SPEED = 0.3; // Adjust based on testing
 
     // PID gains (tune based on testing)
     private static final double kP = 0.05;
@@ -40,6 +41,20 @@ public class WristSubsystem extends SubsystemBase {
         wristMotor.set(output);
     }
 
+    public void moveToAngle (int angleIndex) {
+        double targetPosition = ANGLES[angleIndex];
+
+        while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN) {
+            if (getAngle() < targetPosition) {
+                moveWrist(MOTOR_SPEED);
+            } else {
+                moveWrist(-MOTOR_SPEED);
+            }
+        }
+
+        stop();
+    }
+
     public boolean isAtAngle() {
         return Math.abs(wristEncoder.getPosition() - targetPosition) < ERROR_MARGIN;
     }
@@ -50,5 +65,9 @@ public class WristSubsystem extends SubsystemBase {
 
     public void moveWrist(double speed) {
         wristMotor.set(speed);
+    }
+
+    public double getAngle() {
+        return (0.000767 * wristEncoder.getPosition()* 360)/(Math.PI*2);
     }
 }

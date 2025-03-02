@@ -165,14 +165,20 @@ public final class Constants {
         public static final boolean implemented = false; // Set to true since it's now integrated
 
         /* Motor IDs */
+<<<<<<< HEAD
         public static final int rightMotorID = 1; 
         public static final int leftMotorID = 2;
         public static final int wristMotorID = 11;
+=======
+        public static final int leftMotorID = 1;
+        public static final int rightMotorID = 2; 
+        public static final int wristMotorID = 3;
+>>>>>>> main
 
         /* Encoder Channel */
 
-        public static final int encoderChannelA = 0;
-        public static final int encoderChannelB = 1;
+        public static final int encoderChannelA = 2;
+        public static final int encoderChannelB = 3;
 
         /* Gear Ratio & Pulley System */
         public static final double GEAR_RATIO = 60.0;  // 1:60 gearbox
@@ -181,8 +187,8 @@ public final class Constants {
         public static final double CONVERSION_FACTOR = PULLEY_CIRCUMFERENCE / GEAR_RATIO; // Meters per motor rotation
 
         /* Motion Constraints */
-        public static final double MAX_VELOCITY = 0.50;  // Meters per second
-        public static final double MAX_ACCELERATION = 0.25; // Meters per second squared
+        public static final double MAX_VELOCITY = 0.1;  // Meters per second
+        public static final double MAX_ACCELERATION = 0.05;; // Meters per second squared
         public static final TrapezoidProfile.Constraints CONSTRAINTS =
             new TrapezoidProfile.Constraints(MAX_VELOCITY, MAX_ACCELERATION);
 

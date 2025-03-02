@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -20,8 +21,13 @@ public class ElevatorSetpointCommand extends Command {
 
     @Override
     public void initialize() {
-        elevator.setHeight(heightIndex);
-        wrist.setAngle(angleIndex);
+        if (!CommandScheduler.getInstance().isScheduled(elevator.getDefaultCommand())) {
+            // new Thread(() -> {
+            //     elevator.moveToHeight(targetIndex); // move to angle too 
+            // }).start();
+            elevator.moveToHeight(heightIndex);
+            wrist.moveToAngle(angleIndex);
+        }
     }
 
     @Override

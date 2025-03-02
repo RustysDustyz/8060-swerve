@@ -18,6 +18,7 @@ public class IOCommand extends Command {
     @Override
     public void initialize() {
         s_Wrist.moveWrist(speed);
+        
     }
 
 

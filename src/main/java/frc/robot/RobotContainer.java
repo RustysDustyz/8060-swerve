@@ -29,10 +29,13 @@ public class RobotContainer {
     private final XboxController driver = new XboxController(0);
 
     /* Drive Controls */
-    private final int translationAxis = XboxController.Axis.kLeftY.value;
-    private final int strafeAxis = XboxController.Axis.kLeftX.value;
-    private final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
-    private final int wristIO = XboxController.Axis.kRightY.value;
+    private final int translationAxis = XboxController.Axis.kLeftY.value; // 1
+    private final int strafeAxis = XboxController.Axis.kLeftX.value; // 0
+    private final int rotationAxis = XboxController.Axis.kLeftTrigger.value; // 2
+
+    
+    private final int wristIO = 5;
+    private final int ElevatorIO = 6;
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
@@ -47,7 +50,11 @@ public class RobotContainer {
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
 
+<<<<<<< HEAD
     private final Trigger notSysID = sysidInterface.negate();
+=======
+    private final Trigger notInterface = sysidInterface.negate();
+>>>>>>> main
 
 
     /* Subsystems */
@@ -103,6 +110,13 @@ public class RobotContainer {
             )
         );
 
+        s_Elevator.setDefaultCommand(
+            new ElevatorCommand(
+                s_Elevator,
+                () -> -driver.getRawAxis(ElevatorIO)
+            )
+        );
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -126,11 +140,19 @@ public class RobotContainer {
         NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
         
         /* Elevator Setpoints */
+<<<<<<< HEAD
         elevatorButton1.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
         elevatorButton2.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
         elevatorButton3.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
         elevatorButton4.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
         elevatorButton5.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+=======
+        elevatorButton1.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
+        elevatorButton2.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
+        elevatorButton3.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
+        elevatorButton4.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
+        elevatorButton5.and(notInterface).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+>>>>>>> main
 
         /* Driver Buttons */
 
