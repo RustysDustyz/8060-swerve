@@ -40,6 +40,8 @@ public class WristSubsystem extends SubsystemBase {
         wristMotor.set(output);
     }
 
+    public void moveToAngle (int angleIndex) 
+
     public boolean isAtAngle() {
         return Math.abs(wristEncoder.getPosition() - targetPosition) < ERROR_MARGIN;
     }
@@ -50,5 +52,9 @@ public class WristSubsystem extends SubsystemBase {
 
     public void moveWrist(double speed) {
         wristMotor.set(speed);
+    }
+
+    public void getAngle() {
+        return (0.000767 * encoder.getRaw()* 360)/(Math.PI*2);
     }
 }

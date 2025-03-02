@@ -60,4 +60,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     public boolean isAtHeight(int heightIndex) {
       return Math.abs(getHeight() - HEIGHTS[heightIndex]) < ERROR_MARGIN;
     }
+
+    public void moveElevator(double speed) {
+        leftMotor.set(-speed);
+        rightMotor.set(speed)
+    }
 }
