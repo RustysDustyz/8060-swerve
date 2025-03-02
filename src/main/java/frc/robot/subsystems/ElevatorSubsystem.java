@@ -62,7 +62,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void moveElevator(double speed) {
-        leftMotor.set(-speed);
-        rightMotor.set(speed)
+        leftMotor.set(speed);
+        rightMotor.set(-speed)
     }
 }
