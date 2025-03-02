@@ -30,10 +30,13 @@ public class RobotContainer {
     private final XboxController driver = new XboxController(0);
 
     /* Drive Controls */
-    private final int translationAxis = XboxController.Axis.kLeftY.value;
-    private final int strafeAxis = XboxController.Axis.kLeftX.value;
-    private final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
-    private final int wristIO = XboxController.Axis.kRightY.value;
+    private final int translationAxis = XboxController.Axis.kLeftY.value; // 1
+    private final int strafeAxis = XboxController.Axis.kLeftX.value; // 0
+    private final int rotationAxis = XboxController.Axis.kLeftTrigger.value; // 2
+
+    
+    private final int wristIO = 5;
+    private final int ElevatorIO = 6;
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
@@ -103,6 +106,13 @@ public class RobotContainer {
             new IOCommand(
                 s_Wrist,
                 () -> -driver.getRawAxis(wristIO)
+            )
+        );
+
+        s_Elevator.setDefaultCommand(
+            new ElevatorCommand(
+                s_Elevator,
+                () -> -driver.getRawAxis(ElevatorIO)
             )
         );
 

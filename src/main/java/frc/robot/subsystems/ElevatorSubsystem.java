@@ -81,7 +81,10 @@ public class ElevatorSubsystem extends SubsystemBase {
       if (heightIndex < 0 || heightIndex >= HEIGHTS.length) return;
       double targetPosition = HEIGHTS[heightIndex];
       double output = pidController.calculate(encoder.getDistance(), targetPosition);
+      output *= 0.5;
+
       leftMotor.set(output);
+      //rightMotor.set(-output)
     }
 
     public boolean isAtHeight(int heightIndex) {
@@ -91,4 +94,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void stop() {
       leftMotor.set(0);
    }
+
+   public void moveElevator(double speed) {
+    leftMotor.set(speed*0.2);
+    rightMotor.set(-speed*0.2);
+}
 }
