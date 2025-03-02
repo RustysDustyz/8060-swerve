@@ -20,16 +20,13 @@ public class ElevatorSetpointCommand extends Command {
 
     @Override
     public void initialize() {
-        elevator.setHeight(heightIndex);
-        wrist.setAngle(angleIndex);
-
-        /*
-         *         // Start moving to the target height
-        new Thread(() -> {
+        if (!CommandScheduler.getInstance().isScheduled(ElevatorCommand)) {
+            // new Thread(() -> {
+            //     elevator.moveToHeight(targetIndex); // move to angle too 
+            // }).start();
             elevator.moveToHeight(targetIndex);
-        }).start();
-         */
-    }
+            wrist.moveToAngle(targetPosition);
+        }
 
     @Override
     public boolean isFinished() {
