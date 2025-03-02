@@ -40,7 +40,21 @@ public class WristSubsystem extends SubsystemBase {
         wristMotor.set(output);
     }
 
-    public void moveToAngle (int angleIndex) 
+    public void moveToAngle (int angleIndex) {
+        double targetPosition = ANGLES[angleIndex];
+
+        while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN) {
+            if (getAngle() < targetPosition) {
+                leftMotor.set(speed);
+                rightMotor.set(-speed);
+            } else {
+                leftMotor.set(-speed);
+                rightMotor.set(speed);
+            }
+        }
+
+        stop();
+    }
 
     public boolean isAtAngle() {
         return Math.abs(wristEncoder.getPosition() - targetPosition) < ERROR_MARGIN;
