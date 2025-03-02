@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    s_Elevator.move(driver.getRawAxis(XboxController.Axis.kLeftY.value));
+    s_Elevator.move(driver.getRawAxis(1)*0.2);
   }
 
   @Override

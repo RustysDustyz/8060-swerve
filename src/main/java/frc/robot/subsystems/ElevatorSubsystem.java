@@ -25,6 +25,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       SparkMaxConfig encoderConfig = new SparkMaxConfig();
 
       
+      /*These don't work
       globalConfig
         .inverted(true)
         .idleMode(IdleMode.kCoast);
@@ -34,6 +35,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         .idleMode(IdleMode.kCoast)
         .follow(leftMotor)
         .inverted(true);
+      */
 
       encoderConfig.encoder
         .positionConversionFactor((Math.PI * 0.058) / 60.0)
@@ -57,6 +59,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void move(double speed){
       leftMotor.set(speed);
+      rightMotor.set(-speed);
     }
 
     public void stop() {
