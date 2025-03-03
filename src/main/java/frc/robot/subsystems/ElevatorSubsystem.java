@@ -62,7 +62,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void moveElevator(double speed) {
-        leftMotor.set(speed);
-        rightMotor.set(-speed)
+        if (getHeight() > 0) {
+            leftMotor.set(speed);
+            rightMotor.set(-speed);
+        } else {
+            stop();
+        }
     }
 }
