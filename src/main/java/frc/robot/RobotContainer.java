@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriverConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -32,10 +32,6 @@ public class RobotContainer {
     private final int translationAxis = XboxController.Axis.kLeftY.value; // 1
     private final int strafeAxis = XboxController.Axis.kLeftX.value; // 0
     private final int rotationAxis = XboxController.Axis.kLeftTrigger.value; // 2
-
-    
-    private final int wristIO = 5;
-    private final int ElevatorIO = 6;
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
@@ -58,13 +54,6 @@ public class RobotContainer {
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
     private final WristSubsystem s_Wrist = new WristSubsystem();
-
-    /* Elevator Control Buttons */
-    private final JoystickButton elevatorButton1 = new JoystickButton(driver, 7);  // Assign buttons
-    private final JoystickButton elevatorButton2 = new JoystickButton(driver, 8);
-    private final JoystickButton elevatorButton3 = new JoystickButton(driver, 9);
-    private final JoystickButton elevatorButton4 = new JoystickButton(driver, 10);
-    private final JoystickButton elevatorButton5 = new JoystickButton(driver, 11);
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -102,16 +91,35 @@ public class RobotContainer {
         s_Wrist.setDefaultCommand(
             new IOCommand(
                 s_Wrist,
-                () -> -driver.getRawAxis(wristIO)
+                () -> {switch(driver.getPOV()){
+                    case 90:
+                        return -1;
+                    case 270:
+                        return 1;
+                    default:
+                        return 0;
+                }}
             )
         );
 
         s_Elevator.setDefaultCommand(
-            new ElevatorCommand(
+            new IOCommand(
                 s_Elevator,
-                () -> -driver.getRawAxis(ElevatorIO)
+                () -> {switch(driver.getPOV()){
+                    case 0:
+                        return -1;
+                    case 180:
+                        return 1;
+                    default:
+                        return 0;
+                }}
             )
         );
+
+        /* Named Commands (Auto) */
+        NamedCommands.registerCommand("rotAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, false)).withTimeout(1));
+        NamedCommands.registerCommand("transAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, false, true)).withTimeout(1));
+        NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -124,23 +132,17 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-
-        /* Named Commands (Auto) */
-        NamedCommands.registerCommand("elevator0", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
-        NamedCommands.registerCommand("elevator1", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
-        NamedCommands.registerCommand("elevator2", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
-        NamedCommands.registerCommand("elevator3", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
-        NamedCommands.registerCommand("elevator4", new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
-        NamedCommands.registerCommand("rotAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, false)).withTimeout(1));
-        NamedCommands.registerCommand("transAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, false, true)).withTimeout(1));
-        NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
-        
         /* Elevator Setpoints */
-        elevatorButton1.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 0, 0));
-        elevatorButton2.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 1, 1));
-        elevatorButton3.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 2, 2));
-        elevatorButton4.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 3, 3));
-        elevatorButton5.and(notSysID).onTrue(new ElevatorSetpointCommand(s_Elevator, s_Wrist, 4, 4));
+        for(int i=0;i<ElevatorConstants.setpointCommandCount;i++){
+            // Creates the command.
+            ElevatorSetpointCommand c = new ElevatorSetpointCommand(s_Elevator, s_Wrist, i, i);
+
+            // Registers named commands "elevator<i>"
+            NamedCommands.registerCommand(String.format("elevator%d",i), c);
+
+            // Uses every button for <count> iterations, starting from 7.
+            new JoystickButton(driver, 7+i).and(notSysID).onTrue(c);
+        }
 
         /* Driver Buttons */
 

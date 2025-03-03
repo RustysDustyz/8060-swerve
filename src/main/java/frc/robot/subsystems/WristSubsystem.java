@@ -4,10 +4,9 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
-public class WristSubsystem extends SubsystemBase {
+public class WristSubsystem extends IOSubsystem {
     private final SparkMax wristMotor;
     private final RelativeEncoder wristEncoder;
     private final PIDController pidController;
@@ -17,7 +16,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Error margin (tolerance) in motor rotations
     private static final double ERROR_MARGIN = 1.0; // Adjust as needed
-    private static final double MOTOR_SPEED = 0.3; // Adjust based on testing
+    private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
 
     // PID gains (tune based on testing)
     private static final double kP = 0.05;
@@ -46,9 +45,9 @@ public class WristSubsystem extends SubsystemBase {
 
         while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN) {
             if (getAngle() < targetPosition) {
-                moveWrist(MOTOR_SPEED);
+                set(MOTOR_SPEED);
             } else {
-                moveWrist(-MOTOR_SPEED);
+                set(-MOTOR_SPEED);
             }
         }
 
@@ -59,15 +58,17 @@ public class WristSubsystem extends SubsystemBase {
         return Math.abs(wristEncoder.getPosition() - targetPosition) < ERROR_MARGIN;
     }
 
+    public double getAngle() {
+        return (0.000767 * wristEncoder.getPosition()* 360)/(Math.PI*2);
+    }
+    
+    @Override
     public void stop() {
         wristMotor.set(0);
     }
 
-    public void moveWrist(double speed) {
+    @Override
+    public void set(double speed) {
         wristMotor.set(speed);
-    }
-
-    public double getAngle() {
-        return (0.000767 * wristEncoder.getPosition()* 360)/(Math.PI*2);
     }
 }

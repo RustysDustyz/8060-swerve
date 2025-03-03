@@ -3,24 +3,22 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.IOSubsystem;
 
 public class IOCommand extends Command {
-    private WristSubsystem s_Wrist;
-    private double speed;
+    private IOSubsystem subsystem;
+    private DoubleSupplier speed;
 
-    public IOCommand(WristSubsystem s_Wrist, DoubleSupplier speed) {
-        this.s_Wrist = s_Wrist;
-        this.speed = speed.getAsDouble();
-        addRequirements(s_Wrist);
+    public IOCommand(IOSubsystem subsystem, DoubleSupplier speed) {
+        this.subsystem = subsystem;
+        this.speed = speed;
+        addRequirements(subsystem);
     }
 
     @Override
-    public void initialize() {
-        s_Wrist.moveWrist(speed);
-        
+    public void execute() {
+        subsystem.set(speed.getAsDouble());
     }
-
 
     @Override
     public void end(boolean interrupted) { }
