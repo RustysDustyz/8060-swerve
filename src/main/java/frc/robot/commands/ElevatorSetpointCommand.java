@@ -22,11 +22,11 @@ public class ElevatorSetpointCommand extends Command {
     @Override
     public void initialize() {
         if (!CommandScheduler.getInstance().isScheduled(elevator.getDefaultCommand())) {
-            // new Thread(() -> {
-            //     elevator.moveToHeight(targetIndex); // move to angle too 
-            // }).start();
-            elevator.moveToHeight(heightIndex);
-            wrist.moveToAngle(angleIndex);
+            new Thread(() -> {
+                elevator.moveToHeight(heightIndex);
+                wrist.moveToAngle(angleIndex);
+            }).start();
+            
         }
     }
 
@@ -38,6 +38,7 @@ public class ElevatorSetpointCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         if (interrupted) {
+            
             elevator.stop();
             wrist.stop();
         }

@@ -107,9 +107,9 @@ public class RobotContainer {
                 s_Elevator,
                 () -> {switch(driver.getPOV()){
                     case 0:
-                        return -1;
-                    case 180:
                         return 1;
+                    case 180:
+                        return -1;
                     default:
                         return 0;
                 }}
