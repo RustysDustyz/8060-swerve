@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class Swerve extends SubsystemBase {
     private boolean transMode = false;
+    private boolean leftRight = false;
 
     public SwerveDriveOdometry swerveOdometry;
     public SwerveModule[] mSwerveMods;
@@ -122,25 +123,27 @@ public class Swerve extends SubsystemBase {
         return rotationSpeed;
     }
 
-    public Translation2d transAimAssist(){
-        double kP_trans = 0.02; // Tune this value based on testing
-        //•	  If the robot overshoots, reduce kP.
-        //•	  If the robot is too slow, increase kP.
-        Pose2d aprilTagPose = LimelightHelpers.getBotPose2d("limelight"); // Horizontal error
-        double rightOffset = 2.5 * 0.0254; // 2.5 inches to meters
-        double frontOffset = 14 * 0.0254;  // 14 inches to meters
-
-        // Calculate the desired translation
-        Translation2d desiredTranslation = new Translation2d(
-            (aprilTagPose.getX() + frontOffset) * kP_trans,
-            (aprilTagPose.getY() + rightOffset) * kP_trans
-        );
-        
-        return desiredTranslation;
+    public Translation2d transAimAssist() {
+        double kP_trans = 0.5; // Adjust this value for responsiveness
+    
+        Pose2d aprilTagPose = LimelightHelpers.getBotPose2d("limelight");
+    
+        double sideOffset = leftRight ? 2.5 * 0.0254 : -2.5 * 0.0254; // Convert inches to meters
+    
+        // Move robot only side-to-side based on AprilTag position
+        double strafeSpeed = (aprilTagPose.getY() + sideOffset) * kP_trans;
+    
+        return new Translation2d(0, strafeSpeed);
     }
+    
+    
 
     public void toggleTransMode(){
         transMode = !transMode;
+    }
+
+    public void leftRightAim(){
+        leftRight = !leftRight;
     }
 
     public void drive(ChassisSpeeds speeds){
@@ -156,22 +159,25 @@ public class Swerve extends SubsystemBase {
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean rotAssist, boolean transAssist) {
         //System.out.println(translation);
+        System.out.printf("r: %.3f",rotAimAssist());
+        System.out.printf("t: %s",transAimAssist());
 
         if (rotAssist) {
             rotation = rotAimAssist();
 
-            //System.out.println(rotation = rotAimAssist());
-            fieldRelative = false; // Disable field-relative while aiming
+            //System.out.printf("r: %.3f",rotation);
+            //fieldRelative = false; // Disable field-relative while aiming
         }
 
         if (transAssist) {
             translation = transAimAssist();
 
-            //System.out.println(translation = transAimAssist());
+            //System.out.printf("t: %s",translation);
             // we could also do this:
             // translation = translation.plus(trans_aimAssist());
-            fieldRelative = false; // Disable field-relative while aiming
+            //fieldRelative = false; // Disable field-relative while aiming
         }
+        
         
         if(transMode) rotation = 0;
         SwerveModuleState[] swerveModuleStates =
@@ -207,6 +213,7 @@ public class Swerve extends SubsystemBase {
             // set desired state
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
+        
     }    
 
     /* Used by SwerveControllerCommand in Auto */

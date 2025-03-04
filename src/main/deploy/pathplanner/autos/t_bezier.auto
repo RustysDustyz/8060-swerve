@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "looptyloop"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "t_bezier1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "looptyloop"
+            "pathName": "t_bezier2"
           }
         }
       ]

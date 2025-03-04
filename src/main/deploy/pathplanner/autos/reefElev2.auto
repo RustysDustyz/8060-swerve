@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "b1_toReef"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 0.5
@@ -19,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "dualAim"
+            "name": "rotAim"
           }
         },
         {

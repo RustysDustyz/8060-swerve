@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix6.controls.MusicTone;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -13,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import frc.robot.Constants.DriverConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
@@ -171,6 +171,17 @@ public class RobotContainer {
         }
     }
 
+    private void applyAutoLogic(PathPlannerAuto auto, String commandName){
+        switch (commandName) {
+            case "reefElev1":
+                auto.andThen(new RunCommand(() -> {
+                    new PathPlannerAuto(driver.getRawButton(12) ? "reefLeft" : "reefRight").execute();
+                })).withTimeout(1.5)
+                .andThen(new PathPlannerAuto("reefElev2"));
+                break;
+        }
+    }
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -178,7 +189,9 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         SmartDashboard.updateValues();
-        PathPlannerAuto auto = new PathPlannerAuto(SmartDashboard.getString("autoCommand", "test_bezier"));
+        String commandName = SmartDashboard.getString("autoCommand", "t_bezier");
+        PathPlannerAuto auto = new PathPlannerAuto(commandName);
+        applyAutoLogic(auto, commandName);
         return auto;
     }
 }

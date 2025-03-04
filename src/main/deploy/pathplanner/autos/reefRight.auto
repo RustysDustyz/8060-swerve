@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "bezier1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bezier2"
+            "pathName": "reefRight"
           }
         }
       ]
