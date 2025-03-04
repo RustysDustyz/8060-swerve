@@ -38,7 +38,7 @@ public class SwerveModule {
     private final PIDController turningPidController;
 
     public void resetOptimization(){
-        System.out.printf("reset module %d\n",moduleNumber);
+        //System.out.printf("reset module %d\n",moduleNumber);
         rotationOffset = 0;
         reverseRotOffset = 0;
         reversed = false;
