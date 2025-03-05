@@ -18,6 +18,7 @@ public class WristSubsystem extends IOSubsystem {
     private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
 
     private double targetPosition = 0; // Stores the latest target position
+    private boolean settingAngle = false;
 
     public WristSubsystem() {
         wristMotor = new SparkMax(ElevatorConstants.wristMotorID, MotorType.kBrushless);
@@ -30,13 +31,15 @@ public class WristSubsystem extends IOSubsystem {
     public void moveToAngle (int angleIndex) {
         double targetPosition = ANGLES[angleIndex];
 
-        while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN) {
+        settingAngle = true;
+        while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN && settingAngle) {
             if (getAngle() < targetPosition) {
                 set(MOTOR_SPEED);
             } else {
                 set(-MOTOR_SPEED);
             }
         }
+        settingAngle = false;
 
         stop();
     }
@@ -55,8 +58,9 @@ public class WristSubsystem extends IOSubsystem {
     }
 
     public void setClaw(double speed) {
-        SmartDashboard.putNumber("angle", getAngle());
-        wristMotor.set(0.15*speed);
+        settingAngle = false;
+        SmartDashboard.putNumber("claw-angle", getAngle());
+        wristMotor.set(MOTOR_SPEED*speed);
     }
 
     public void setIntake(double speed) {

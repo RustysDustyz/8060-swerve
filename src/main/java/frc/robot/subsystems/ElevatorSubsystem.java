@@ -21,8 +21,10 @@ public class ElevatorSubsystem extends IOSubsystem {
     };
 
     private static final double ERROR_MARGIN = 0.01; // 2 cm tolerance
-    private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
+    private static final double MOTOR_SPEED = 0.3; // Adjust based on testing
     private static final double MAX_HEIGHT = 0.6;
+
+    private boolean settingHeight = false;
 
     public ElevatorSubsystem() {
         leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
@@ -36,8 +38,8 @@ public class ElevatorSubsystem extends IOSubsystem {
         double targetPosition = HEIGHTS[heightIndex];
         System.out.println(targetPosition);
 
-
-        while (Math.abs(getHeight() - targetPosition) > ERROR_MARGIN) {
+        settingHeight = true;
+        while (Math.abs(getHeight() - targetPosition) > ERROR_MARGIN && settingHeight) {
             if (getHeight() < targetPosition) {
                 leftMotor.set(MOTOR_SPEED);
                 rightMotor.set(-MOTOR_SPEED); // Reverse one motor if needed
@@ -46,9 +48,9 @@ public class ElevatorSubsystem extends IOSubsystem {
                 rightMotor.set(MOTOR_SPEED);
             }
         }
+        settingHeight = false;
 
         stop(); // Stop motors when within margin
-        System.out.println("stop");
     }
 
     public double getHeight() {
@@ -67,6 +69,7 @@ public class ElevatorSubsystem extends IOSubsystem {
 
     @Override
     public void set(double speed) {
+        settingHeight = false;
         double currentHeight = getHeight();
         /* 
         // Prevent moving up if at or below ground level
@@ -84,11 +87,10 @@ public class ElevatorSubsystem extends IOSubsystem {
         }
         */
 
-        SmartDashboard.putNumber("height", getHeight());
+        SmartDashboard.putNumber("elevator-height", getHeight());
         
-
-        leftMotor.set(speed*0.3);
-        rightMotor.set(-speed*0.3);
+        leftMotor.set(speed*MOTOR_SPEED);
+        rightMotor.set(-speed*MOTOR_SPEED);
         if (speed != 0) {
             System.out.println(speed);
         }

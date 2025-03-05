@@ -21,7 +21,6 @@ public class ElevatorSetpointCommand extends Command {
 
     @Override
     public void initialize() {
-        System.out.println(heightIndex);
         if (!CommandScheduler.getInstance().isScheduled(elevator.getDefaultCommand())) {
             new Thread(() -> {
                 elevator.moveToHeight(heightIndex);
