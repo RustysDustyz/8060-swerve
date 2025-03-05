@@ -8,6 +8,7 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class WristSubsystem extends IOSubsystem {
     private final SparkMax wristMotor;
+    private final SparkMax intakeMotor;
     private final RelativeEncoder wristEncoder;
     // Wrist positions in motor rotations (adjust as needed)
     private static final double[] ANGLES = {-30.0, -15.0, 0.0, 15.0, 30.0}; // Example values in motor rotations
@@ -20,6 +21,7 @@ public class WristSubsystem extends IOSubsystem {
 
     public WristSubsystem() {
         wristMotor = new SparkMax(ElevatorConstants.wristMotorID, MotorType.kBrushless);
+        intakeMotor = new SparkMax(ElevatorConstants.intakeMotorID, MotorType.kBrushless);
         wristEncoder = wristMotor.getEncoder();
         
         wristEncoder.setPosition(0); // Reset encoder at startup
@@ -52,9 +54,12 @@ public class WristSubsystem extends IOSubsystem {
         wristMotor.set(0);
     }
 
-    @Override
-    public void set(double speed) {
+    public void setClaw(double speed) {
         SmartDashboard.putNumber("angle", getAngle());
         wristMotor.set(speed);
+    }
+
+    public void setIntake(double speed) {
+        intakeMotor.set(speed);
     }
 }

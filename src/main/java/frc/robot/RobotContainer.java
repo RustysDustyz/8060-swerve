@@ -11,9 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import frc.robot.Constants.DriverConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -35,18 +33,14 @@ public class RobotContainer {
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
-    private final JoystickButton translationMode = new JoystickButton(driver, 1);
+    private final JoystickButton translationMode = new JoystickButton(driver, 3);
 
     // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
-    private final JoystickButton rotAssist = new JoystickButton(driver, 3);
+    private final JoystickButton rotAssist = new JoystickButton(driver, 1);
     private final JoystickButton transAssist = new JoystickButton(driver, 4);
-
-    private final JoystickButton sysidInterface = new JoystickButton(driver, 2);
     
     private final JoystickButton robotCentric = new JoystickButton(driver, 5);
     private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
-
-    private final Trigger notSysID = sysidInterface.negate();
 
 
     /* Subsystems */
@@ -79,9 +73,9 @@ public class RobotContainer {
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
-                () -> driver.getRawAxis(translationAxis), 
-                () -> driver.getRawAxis(strafeAxis), 
-                () -> driver.getRawAxis(rotationAxis), 
+                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(translationAxis), 
+                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(strafeAxis), 
+                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(rotationAxis), 
                 () -> robotCentric.getAsBoolean(),
                 () -> rotAssist.getAsBoolean(),
                 () -> transAssist.getAsBoolean()
@@ -89,18 +83,24 @@ public class RobotContainer {
         );
 
         s_Wrist.setDefaultCommand(
-            new IOCommand(
+            new WristCommand(
                 s_Wrist,
-                () -> {switch(driver.getPOV()){
+                () -> {
+                    if(driver.getRawButton(2)) return 0;
+                    switch(driver.getPOV()){
                     case 90:
                         return 1;
                     case 270:
                         return -1;
                     default:
                         return 0;
-                }}
+                    }
+                },
+                () -> !driver.getRawButton(2) ? 0 : driver.getRawAxis(translationAxis)
             )
         );
+
+        
 
         s_Elevator.setDefaultCommand(
             new IOCommand(
@@ -141,7 +141,7 @@ public class RobotContainer {
             NamedCommands.registerCommand(String.format("elevator%d",i), c);
 
             // Uses every button for <count> iterations, starting from 7.
-            new JoystickButton(driver, 7+i).and(notSysID).onTrue(c);
+            new JoystickButton(driver, 7+i).onTrue(c);
         }
 
         /* Driver Buttons */
@@ -151,24 +151,6 @@ public class RobotContainer {
 
         // Translation Mode : Press Btn 1 to toggle
         translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
-
-        if(DriverConstants.enableSysID){
-            // Sys ID Dynam Test : Press Btn 3 + 7 to start
-            // Warning: Very fast!
-            sysidInterface
-                .and(new JoystickButton(driver, 7))
-                .onTrue(s_Swerve.getDriveDynamTest());
-                
-            // SYS ID Quad Test : Press Btn 3 + 8 to start
-            // Warnin g: Very fast!
-            sysidInterface
-                .and(new JoystickButton(driver, 8))
-                .onTrue(s_Swerve.getDriveQuadTest());
-        }else{
-            sysidInterface.onTrue(new InstantCommand(() -> System.out.println(
-                "SysID interface is disabled. Enable in Constants.DriverConstants.enableSysID"
-            )));
-        }
     }
 
     private void applyAutoLogic(PathPlannerAuto auto, String commandName){

@@ -16,16 +16,6 @@ public final class Constants {
     public static final double translationDeadband = 0.1;
     public static final double angularDeadband = 0.5;
 
-    public static final class DriverConstants {
-        /**
-         * SysID button is an interface for performing SysID functions;
-         * see {@link RobotContainer.sysidMode}.
-         * Warning: SysID routines make the wheels spin VERY fast.
-         * Give the robot LOTS of clearance (don't run SysID inside).
-         */
-        public static final boolean enableSysID = false;
-    }
-
     public static final class SwerveConstants {
         public static final int pigeonID = 1;
 
@@ -168,6 +158,7 @@ public final class Constants {
         public static final int leftMotorID = 1;
         public static final int rightMotorID = 2; 
         public static final int wristMotorID = 3;
+        public static final int intakeMotorID = 4;
 
         /* Encoder Channel */
 
@@ -203,7 +194,6 @@ public final class Constants {
         public static final double ELEVATOR_SETPOINT_3 = 0.6;
         public static final double ELEVATOR_SETPOINT_4 = 0.9;
         public static final double ELEVATOR_SETPOINT_5 = 1.2;
-
     }
 
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
