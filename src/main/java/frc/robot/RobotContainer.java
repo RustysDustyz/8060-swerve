@@ -93,9 +93,9 @@ public class RobotContainer {
                 s_Wrist,
                 () -> {switch(driver.getPOV()){
                     case 90:
-                        return -1;
-                    case 270:
                         return 1;
+                    case 270:
+                        return -1;
                     default:
                         return 0;
                 }}

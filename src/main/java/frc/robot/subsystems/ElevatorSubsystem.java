@@ -20,7 +20,7 @@ public class ElevatorSubsystem extends IOSubsystem {
       0.60,  // Fourth level
     };
 
-    private static final double ERROR_MARGIN = 0.02; // 2 cm tolerance
+    private static final double ERROR_MARGIN = 0.01; // 2 cm tolerance
     private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
     private static final double MAX_HEIGHT = 0.63;
 
@@ -34,6 +34,8 @@ public class ElevatorSubsystem extends IOSubsystem {
     
     public void moveToHeight(int heightIndex) {
         double targetPosition = HEIGHTS[heightIndex];
+        System.out.println(targetPosition);
+
 
         while (Math.abs(getHeight() - targetPosition) > ERROR_MARGIN) {
             if (getHeight() < targetPosition) {
@@ -66,7 +68,7 @@ public class ElevatorSubsystem extends IOSubsystem {
     @Override
     public void set(double speed) {
         double currentHeight = getHeight();
-        
+        /* 
         // Prevent moving up if at or below ground level
         if (speed < 0 && currentHeight < 0) {
             stop();
@@ -80,13 +82,13 @@ public class ElevatorSubsystem extends IOSubsystem {
             System.out.println("maxxed");
             return;
         }
-        
+        */
 
           SmartDashboard.putNumber("height", getHeight());
         
 
-        leftMotor.set(speed);
-        rightMotor.set(-speed);
+        leftMotor.set(speed*0.3);
+        rightMotor.set(-speed*0.3);
         if (speed != 0) {
             System.out.println(speed);
         }

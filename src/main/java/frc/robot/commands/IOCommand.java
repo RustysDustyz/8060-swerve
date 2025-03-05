@@ -17,7 +17,7 @@ public class IOCommand extends Command {
 
     @Override
     public void execute() {
-        subsystem.set(0.3*speed.getAsDouble());
+        subsystem.set(speed.getAsDouble());
     }
 
     @Override

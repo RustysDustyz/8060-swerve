@@ -33,12 +33,6 @@ public class WristSubsystem extends IOSubsystem {
         wristEncoder.setPosition(0); // Reset encoder at startup
     }
 
-    public void setAngle(int angleIndex) {
-        if (angleIndex < 0 || angleIndex >= ANGLES.length) return;
-        targetPosition = ANGLES[angleIndex];
-        double output = pidController.calculate(wristEncoder.getPosition(), targetPosition);
-        wristMotor.set(output);
-    }
 
     public void moveToAngle (int angleIndex) {
         double targetPosition = ANGLES[angleIndex];
@@ -59,7 +53,7 @@ public class WristSubsystem extends IOSubsystem {
     }
 
     public double getAngle() {
-        return (0.000767 * wristEncoder.getPosition()* 360)/(Math.PI*2);
+        return (wristEncoder.getPosition()* 360)/(Math.PI*2);
     }
     
     @Override
@@ -69,6 +63,6 @@ public class WristSubsystem extends IOSubsystem {
 
     @Override
     public void set(double speed) {
-        wristMotor.set(speed);
+        wristMotor.set(0.1*speed);
     }
 }

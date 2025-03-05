@@ -159,8 +159,8 @@ public class Swerve extends SubsystemBase {
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean rotAssist, boolean transAssist) {
         //System.out.println(translation);
-        System.out.printf("r: %.3f",rotAimAssist());
-        System.out.printf("t: %s",transAimAssist());
+        //System.out.printf("r: %.3f",rotAimAssist());
+        //System.out.printf("t: %s",transAimAssist());
 
         if (rotAssist) {
             rotation = rotAimAssist();
