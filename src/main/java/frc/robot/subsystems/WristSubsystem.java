@@ -56,7 +56,7 @@ public class WristSubsystem extends IOSubsystem {
 
     public void setClaw(double speed) {
         SmartDashboard.putNumber("angle", getAngle());
-        wristMotor.set(0.15*speed);
+        wristMotor.set(0.17*speed);
     }
 
     public void setIntake(double speed) {
