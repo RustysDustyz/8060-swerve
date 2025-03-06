@@ -21,7 +21,7 @@ public class ElevatorSubsystem extends IOSubsystem {
     };
 
     private static final double ERROR_MARGIN = 0.01; // 2 cm tolerance
-    private static final double MOTOR_SPEED = 0.3; // Adjust based on testing
+    private static final double MOTOR_SPEED = 0.5; // Adjust based on testing
     private static final double MAX_HEIGHT = 0.6;
 
     private boolean settingHeight = false;

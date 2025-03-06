@@ -15,7 +15,7 @@ public class WristSubsystem extends IOSubsystem {
 
     // Error margin (tolerance) in motor rotations
     private static final double ERROR_MARGIN = 0.5; // Adjust as needed
-    private static final double MOTOR_SPEED = 0.1; // Adjust based on testing
+    private static final double MOTOR_SPEED = 0.3; // Adjust based on testing
 
     private boolean manualControlActive = false; // Flag for preventing periodic interference
 

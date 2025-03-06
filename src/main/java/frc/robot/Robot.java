@@ -13,7 +13,9 @@ import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoSink;
+import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -43,8 +45,10 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.`
     camera1 = CameraServer.startAutomaticCapture(0);
-    server = CameraServer.getServer();
-    server.setSource(camera1);
+    camera1.setResolution(160, 120);
+    camera1.setPixelFormat(PixelFormat.kMJPEG);
+    //server = CameraServer.getServer();
+    //server.setSource(camera1);
     
     try {
       robotConfig = RobotConfig.fromGUISettings();
