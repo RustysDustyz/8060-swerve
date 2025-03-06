@@ -6,16 +6,14 @@ import frc.robot.subsystems.WristSubsystem;
 
 public class ElevatorSetpointCommand extends Command {
     private final ElevatorSubsystem elevator;
-    private final WristSubsystem wrist;
     private final int heightIndex;
     private final int angleIndex;
 
-    public ElevatorSetpointCommand(ElevatorSubsystem elevator, WristSubsystem wrist, int heightIndex, int angleIndex) {
+    public ElevatorSetpointCommand(ElevatorSubsystem elevator, int heightIndex, int angleIndex) {
         this.elevator = elevator;
-        this.wrist = wrist;
         this.heightIndex = heightIndex;
         this.angleIndex = angleIndex;
-        addRequirements(elevator, wrist);
+        addRequirements(elevator);
     }
 
     @Override
@@ -26,7 +24,6 @@ public class ElevatorSetpointCommand extends Command {
     @Override
     public void execute() {
         elevator.moveToHeight(heightIndex);
-        wrist.moveToAngle(angleIndex);
     }
 
     @Override
@@ -39,7 +36,6 @@ public class ElevatorSetpointCommand extends Command {
         if (interrupted) {
             //System.out.println("Setpoint command interrupted.");
             elevator.stop();
-            wrist.stop();
         }
         //System.out.println("Setpoint command completed.");
     }
