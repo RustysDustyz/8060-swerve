@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -21,27 +20,27 @@ public class ElevatorSetpointCommand extends Command {
 
     @Override
     public void initialize() {
-        System.out.println(heightIndex);
-        if (!CommandScheduler.getInstance().isScheduled(elevator.getDefaultCommand())) {
-            new Thread(() -> {
-                elevator.moveToHeight(heightIndex);
-                wrist.moveToAngle(angleIndex);
-            }).start();
-            
-        }
+        //System.out.println("Starting setpoint command: Elevator " + heightIndex + ", Wrist " + angleIndex);
+    }
+
+    @Override
+    public void execute() {
+        elevator.moveToHeight(heightIndex);
+        wrist.moveToAngle(angleIndex);
     }
 
     @Override
     public boolean isFinished() {
-        return elevator.isAtHeight(heightIndex) && wrist.isAtAngle(); // Both must be in tolerance
+        return elevator.isAtHeight(heightIndex) && wrist.isAtAngle();
     }
 
     @Override
     public void end(boolean interrupted) {
         if (interrupted) {
-            
+            //System.out.println("Setpoint command interrupted.");
             elevator.stop();
             wrist.stop();
         }
+        //System.out.println("Setpoint command completed.");
     }
 }
