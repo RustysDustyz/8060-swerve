@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ElevatorConstants;
 
 public class WristSubsystem extends IOSubsystem {
@@ -11,14 +12,15 @@ public class WristSubsystem extends IOSubsystem {
     private final SparkMax intakeMotor;
     private final RelativeEncoder wristEncoder;
     // Wrist positions in motor rotations (adjust as needed)
-    private static final double[] ANGLES = {-30.0, -15.0, 0.0, 15.0, 30.0}; // Example values in motor rotations
+    private static final double[] ANGLES = {0, -692.13, -724.87, -724.87, 30.0}; // Example values in motor rotations
 
     // Error margin (tolerance) in motor rotations
-    private static final double ERROR_MARGIN = 1.0; // Adjust as needed
-    private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
+    private static final double ERROR_MARGIN = 0.5; // Adjust as needed
+    private static final double MOTOR_SPEED = 0.1; // Adjust based on testing
+
+    private boolean manualControlActive = false; // Flag for preventing periodic interference
 
     private double targetPosition = 0; // Stores the latest target position
-    private boolean settingAngle = false;
 
     public WristSubsystem() {
         wristMotor = new SparkMax(ElevatorConstants.wristMotorID, MotorType.kBrushless);
@@ -28,21 +30,22 @@ public class WristSubsystem extends IOSubsystem {
         wristEncoder.setPosition(0); // Reset encoder at startup
     }
 
-    public void moveToAngle (int angleIndex) {
-        double targetPosition = ANGLES[angleIndex];
-
-        settingAngle = true;
-        while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN && settingAngle) {
-            if (getAngle() < targetPosition) {
-                set(MOTOR_SPEED);
-            } else {
-                set(-MOTOR_SPEED);
-            }
+    public void moveToAngle(int angleIndex) {
+        manualControlActive = true;
+        targetPosition = ANGLES[angleIndex]; 
+    
+        double error = getAngle() - targetPosition;
+        // Use simple proportional control to move the wrist
+        double speed = Math.copySign(MOTOR_SPEED, -error);
+        
+        if (Math.abs(error) > ERROR_MARGIN) {
+            wristMotor.set(speed);
+            System.out.println(speed);
+        } else {
+            stop();
+            manualControlActive = false;
         }
-        settingAngle = false;
-
-        stop();
-    }
+    }    
 
     public boolean isAtAngle() {
         return Math.abs(wristEncoder.getPosition() - targetPosition) < ERROR_MARGIN;
@@ -58,12 +61,26 @@ public class WristSubsystem extends IOSubsystem {
     }
 
     public void setClaw(double speed) {
-        settingAngle = false;
-        SmartDashboard.putNumber("claw-angle", getAngle());
-        wristMotor.set(MOTOR_SPEED*speed);
+        //System.out.println(speed);
+        if (speed < 0) {
+            manualControlActive = true;
+            wristMotor.set(0.12*speed);
+        } else if (speed > 0){
+            manualControlActive = true;
+            wristMotor.set(0.18*speed);
+        } else {
+            wristMotor.set(0.01);
+            manualControlActive = false;
+        }
+        SmartDashboard.putNumber("angle", getAngle());
     }
 
     public void setIntake(double speed) {
         intakeMotor.set(speed);
+    }
+    
+    @Override
+    public void periodic() {
+    
     }
 }

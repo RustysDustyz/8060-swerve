@@ -114,7 +114,7 @@ public class Swerve extends SubsystemBase {
     
 
     public double rotAimAssist(){
-        double kP_rot = 0.001; // Tune this value based on testing
+        double kP_rot = 0.0075; // Tune this value based on testing
         //•	  If the robot overshoots, reduce kP.
         //•	  If the robot is too slow, increase kP.
         double tx = LimelightHelpers.getTX("limelight"); // Horizontal error
@@ -124,20 +124,30 @@ public class Swerve extends SubsystemBase {
     }
 
     public Translation2d transAimAssist() {
-        double kP_trans = 0.5; // Adjust this value for responsiveness
+        double kP_trans = 0.3; // Adjust this for responsiveness
+        double targetOffsetMeters = 8 * 0.0254; // 8 inches converted to meters
     
         Pose2d aprilTagPose = LimelightHelpers.getBotPose2d("limelight");
+        double currentY = getPose().getY(); // Robot's current Y position
     
-        double sideOffset = leftRight ? 2.5 * 0.0254 : -2.5 * 0.0254; // Convert inches to meters
+        // Determine target Y position
+        double targetY = aprilTagPose.getY() + (leftRight ? targetOffsetMeters : -targetOffsetMeters);
     
-        // Move robot only side-to-side based on AprilTag position
-        double strafeSpeed = (aprilTagPose.getY() + sideOffset) * kP_trans;
+        // Compute error (difference between current and target)
+        double error = targetY - currentY;
+        System.out.println(error);
     
+        // Stop moving when close enough
+        if (Math.abs(error) < 0.01) { // Stop when within 1cm of target
+            return new Translation2d(0, 0);
+        }
+    
+        // Move towards target position
+        double strafeSpeed = error * kP_trans;
         return new Translation2d(0, strafeSpeed);
     }
     
     
-
     public void toggleTransMode(){
         transMode = !transMode;
     }

@@ -14,9 +14,9 @@ public class ElevatorSubsystem extends IOSubsystem {
     // Heights in meters (adjust based on testing)
     private static final double[] HEIGHTS = {
       0.00,  // Ground level
-      0.075,  // First level
-      0.2670,  // Second level
-      0.4867,  // Third level
+      0.120,  // First level
+      0.247,  // Second level
+      0.475,  // Third level
       0.60,  // Fourth level
     };
 
@@ -36,22 +36,18 @@ public class ElevatorSubsystem extends IOSubsystem {
     
     public void moveToHeight(int heightIndex) {
         double targetPosition = HEIGHTS[heightIndex];
-        System.out.println(targetPosition);
-
-        settingHeight = true;
-        while (Math.abs(getHeight() - targetPosition) > ERROR_MARGIN && settingHeight) {
-            if (getHeight() < targetPosition) {
-                leftMotor.set(MOTOR_SPEED);
-                rightMotor.set(-MOTOR_SPEED); // Reverse one motor if needed
-            } else {
-                leftMotor.set(-MOTOR_SPEED);
-                rightMotor.set(MOTOR_SPEED);
-            }
+        double error = getHeight() - targetPosition;
+    
+        double speed = Math.copySign(MOTOR_SPEED, -error);
+    
+        if (Math.abs(error) > ERROR_MARGIN) {
+            leftMotor.set(speed);
+            rightMotor.set(-speed); // Reverse if necessary
+        } else {
+            stop();
         }
-        settingHeight = false;
-
-        stop(); // Stop motors when within margin
     }
+    
 
     public double getHeight() {
         return encoder.getRaw() * 0.0000194918; // Convert encoder counts to meters
