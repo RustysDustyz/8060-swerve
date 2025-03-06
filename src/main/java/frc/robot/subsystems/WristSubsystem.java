@@ -17,6 +17,8 @@ public class WristSubsystem extends IOSubsystem {
     private static final double ERROR_MARGIN = 1.0; // Adjust as needed
     private static final double MOTOR_SPEED = 0.15; // Adjust based on testing
 
+    private boolean manualControlActive = false; // Flag for preventing periodic interference
+
     private double targetPosition = 0; // Stores the latest target position
 
     public WristSubsystem() {
@@ -28,6 +30,7 @@ public class WristSubsystem extends IOSubsystem {
     }
 
     public void moveToAngle (int angleIndex) {
+        manualControlActive = true;
         double targetPosition = ANGLES[angleIndex];
 
         while (Math.abs(getAngle() - targetPosition) > ERROR_MARGIN) {
@@ -37,7 +40,7 @@ public class WristSubsystem extends IOSubsystem {
                 set(-MOTOR_SPEED);
             }
         }
-
+        manualControlActive = false;
         stop();
     }
 
@@ -55,11 +58,26 @@ public class WristSubsystem extends IOSubsystem {
     }
 
     public void setClaw(double speed) {
+        if (speed != 0) {
+            manualControlActive = true;
+        } else {
+            manualControlActive = false;
+        }
+        
         SmartDashboard.putNumber("angle", getAngle());
         wristMotor.set(0.15*speed);
     }
 
     public void setIntake(double speed) {
         intakeMotor.set(speed);
+    }
+    
+    @Override
+    public void periodic() {
+        System.out.println(manualControlActive);
+        if (!manualControlActive) {
+            System.out.println("test");
+            wristMotor.set(0.1);
+        }
     }
 }
