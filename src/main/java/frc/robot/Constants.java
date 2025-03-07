@@ -9,12 +9,41 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.XboxController;
 import frc.lib.util.COTSTalonFXSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
     public static final double translationDeadband = 0.1;
     public static final double angularDeadband = 0.5;
+
+    public static final class DriverBinds {
+        // Axes
+        public static final int translationAxis = XboxController.Axis.kLeftY.value;
+        public static final int strafeAxis = XboxController.Axis.kLeftX.value;
+        public static final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
+
+        // Swerve binds
+        public static final int translationToggleButton = 3;
+        public static final int robotCentricButton = 5;
+        public static final int zeroGyroButton = 6;
+
+        // Aim assist
+        public static final int rotationAimAssistButton = 1;
+        public static final int translationAimAssistButton = 4;
+
+        // Elevator
+        public static final int intakeControlButton = 2;
+        public static final int[] elevatorSetpointButtons = {
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+        };
+        
+    }
 
     public static final class SwerveConstants {
         public static final int pigeonID = 1;

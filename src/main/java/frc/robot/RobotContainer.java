@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
+import frc.robot.Constants.DriverBinds;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -26,21 +26,15 @@ public class RobotContainer {
     /* Controllers */
     private final XboxController driver = new XboxController(0);
 
-    /* Drive Controls */
-    private final int translationAxis = XboxController.Axis.kLeftY.value; // 1
-    private final int strafeAxis = XboxController.Axis.kLeftX.value; // 0
-    private final int rotationAxis = XboxController.Axis.kLeftTrigger.value; // 2
-
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
-    private final JoystickButton translationMode = new JoystickButton(driver, 3);
+    private final JoystickButton translationMode = new JoystickButton(driver, DriverBinds.translationToggleButton);
 
-    // TODO: Implement an "aim assist" system for AprilTags using LimeLight.
-    private final JoystickButton rotAssist = new JoystickButton(driver, 1);
-    private final JoystickButton transAssist = new JoystickButton(driver, 4);
+    private final JoystickButton rotAssist = new JoystickButton(driver, DriverBinds.rotationAimAssistButton);
+    private final JoystickButton transAssist = new JoystickButton(driver, DriverBinds.translationAimAssistButton);
     
-    private final JoystickButton robotCentric = new JoystickButton(driver, 5);
-    private final JoystickButton zeroGyro = new JoystickButton(driver, 6);
+    private final JoystickButton robotCentric = new JoystickButton(driver, DriverBinds.robotCentricButton);
+    private final JoystickButton zeroGyro = new JoystickButton(driver, DriverBinds.zeroGyroButton);
 
 
     /* Subsystems */
@@ -73,9 +67,9 @@ public class RobotContainer {
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
-                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(translationAxis), 
-                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(strafeAxis), 
-                () -> driver.getRawButton(2) ? 0 : driver.getRawAxis(rotationAxis), 
+                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.translationAxis), 
+                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.strafeAxis), 
+                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.rotationAxis), 
                 () -> robotCentric.getAsBoolean(),
                 () -> rotAssist.getAsBoolean(),
                 () -> transAssist.getAsBoolean()
@@ -86,7 +80,7 @@ public class RobotContainer {
             new WristCommand(
                 s_Wrist,
                 () -> {
-                    if(driver.getRawButton(2)) return 0;
+                    if(driver.getRawButton(DriverBinds.intakeControlButton)) return 0;
                     switch(driver.getPOV()){
                     case 90:
                         return 1;
@@ -96,7 +90,7 @@ public class RobotContainer {
                         return 0;
                     }
                 },
-                () -> !driver.getRawButton(2) ? 0 : driver.getRawAxis(translationAxis)
+                () -> !driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.translationAxis)
             )
         );
 
@@ -142,8 +136,12 @@ public class RobotContainer {
             // Registers named commands "elevator<i>"
             NamedCommands.registerCommand(String.format("elevator%d",i), c);
 
-            // Uses every button for <count> iterations, starting from 7.
-            new JoystickButton(driver, 7+i).onTrue(c);
+            // Registers buttons.
+            int driverSetpointButtonID = i >= DriverBinds.elevatorSetpointButtons.length
+                ? -1
+                : DriverBinds.elevatorSetpointButtons[i]
+            ;
+            if(driverSetpointButtonID == -1) new JoystickButton(driver, driverSetpointButtonID).onTrue(c);
         }
 
         /* Driver Buttons */
