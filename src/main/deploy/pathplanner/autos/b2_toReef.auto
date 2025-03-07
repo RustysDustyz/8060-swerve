@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "b2_toReef"
+          }
+        },
+        {
           "type": "wait",
           "data": {
             "waitTime": 0.5
@@ -26,6 +32,12 @@
           "type": "named",
           "data": {
             "name": "elevator2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOut"
           }
         }
       ]

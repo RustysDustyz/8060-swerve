@@ -25,6 +25,7 @@ import edu.wpi.first.units.BaseUnits;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -124,28 +125,36 @@ public class Swerve extends SubsystemBase {
     }
 
     public Translation2d transAimAssist() {
-        double kP_trans = 0.3; // Adjust this for responsiveness
-        double targetOffsetMeters = 8 * 0.0254; // 8 inches converted to meters
+        double kP_trans = 0.2; // Adjust for responsiveness
+        double targetOffsetMeters = 8 * 0.0254; // 8 inches in meters
+        double limelightOffset = 8 * 0.0254; // Limelight is 8 inches to the left
     
         Pose2d aprilTagPose = LimelightHelpers.getBotPose2d("limelight");
-        double currentY = getPose().getY(); // Robot's current Y position
+        
+        // Compute the true robot center Y position
+        double currentY = aprilTagPose.getY() + limelightOffset;
     
-        // Determine target Y position
+        // Determine target Y position (8 inches left or right of the tag)
         double targetY = aprilTagPose.getY() + (leftRight ? targetOffsetMeters : -targetOffsetMeters);
+        System.out.println("Strafe Speed: " + targetY);
     
         // Compute error (difference between current and target)
         double error = targetY - currentY;
-        System.out.println(error);
+        //System.out.println("Error: " + error);
     
         // Stop moving when close enough
-        if (Math.abs(error) < 0.01) { // Stop when within 1cm of target
+        if (Math.abs(error) < 0.01) { // Within 1cm of target
+            System.out.println("Close enough, stopping");
             return new Translation2d(0, 0);
         }
     
-        // Move towards target position
+        // Move towards the target
         double strafeSpeed = error * kP_trans;
+        //System.out.println("Strafe Speed: " + strafeSpeed);
+    
         return new Translation2d(0, strafeSpeed);
     }
+    
     
     
     public void toggleTransMode(){

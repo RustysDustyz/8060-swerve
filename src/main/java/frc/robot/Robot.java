@@ -12,10 +12,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -41,6 +38,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.`
+    CameraServer.startAutomaticCapture();
     try {
       robotConfig = RobotConfig.fromGUISettings();
     } catch (IOException | ParseException e) {

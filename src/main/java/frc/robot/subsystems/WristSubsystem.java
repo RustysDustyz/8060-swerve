@@ -4,7 +4,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ElevatorConstants;
 
 public class WristSubsystem extends IOSubsystem {
@@ -62,15 +61,13 @@ public class WristSubsystem extends IOSubsystem {
 
     public void setClaw(double speed) {
         //System.out.println(speed);
+        manualControlActive = speed == 0;
         if (speed < 0) {
-            manualControlActive = true;
             wristMotor.set(0.12*speed);
         } else if (speed > 0){
-            manualControlActive = true;
             wristMotor.set(0.18*speed);
         } else {
             wristMotor.set(0.01);
-            manualControlActive = false;
         }
         SmartDashboard.putNumber("angle", getAngle());
     }

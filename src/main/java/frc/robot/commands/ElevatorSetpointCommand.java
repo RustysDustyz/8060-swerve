@@ -31,7 +31,7 @@ public class ElevatorSetpointCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return elevator.isAtHeight(heightIndex) && wrist.isAtAngle();
+        return elevator.isAtHeight(heightIndex);// && wrist.isAtAngle();
     }
 
     @Override

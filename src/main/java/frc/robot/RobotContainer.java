@@ -53,7 +53,7 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         // SmartDashboard Inputs
-        SmartDashboard.putString("autoCommand", "test_elev");
+        SmartDashboard.putString("autoCommand", "b1_toReef");
 
         /*
         SmartDashboard.putNumber("startX", 0.5);
@@ -120,6 +120,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("rotAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, false)).withTimeout(1));
         NamedCommands.registerCommand("transAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, false, true)).withTimeout(1));
         NamedCommands.registerCommand("dualAim", new RunCommand(() -> s_Swerve.drive(Translation2d.kZero, 0, true, true, true, true)).withTimeout(1));
+        NamedCommands.registerCommand("intakeIn", new RunCommand(() -> s_Wrist.setIntake(-1)).withTimeout(1));
+        NamedCommands.registerCommand("intakeOut", new RunCommand(() -> s_Wrist.setIntake(1)).withTimeout(1));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -154,6 +156,7 @@ public class RobotContainer {
     }
 
     private void applyAutoLogic(PathPlannerAuto auto, String commandName){
+        /*
         switch (commandName) {
             case "reefElev1":
                 auto.andThen(new RunCommand(() -> {
@@ -162,6 +165,7 @@ public class RobotContainer {
                 .andThen(new PathPlannerAuto("reefElev2"));
                 break;
         }
+        */
     }
 
     /**

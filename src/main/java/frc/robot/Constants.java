@@ -188,7 +188,7 @@ public final class Constants {
         public static final double kV = 1.3;
 
         /* Elevator Setpoints (in meters) */
-        public static final int setpointCommandCount = 4;
+        public static final int setpointCommandCount = 5;
         public static final double ELEVATOR_SETPOINT_1 = 0.1;
         public static final double ELEVATOR_SETPOINT_2 = 0.3;
         public static final double ELEVATOR_SETPOINT_3 = 0.6;
