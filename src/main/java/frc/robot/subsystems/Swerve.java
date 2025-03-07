@@ -30,7 +30,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class Swerve extends SubsystemBase {
-    private boolean transMode = false;
     private boolean leftRight = false;
 
     public SwerveDriveOdometry swerveOdometry;
@@ -143,7 +142,7 @@ public class Swerve extends SubsystemBase {
     
         // Stop moving when close enough
         if (Math.abs(error) < 0.01) { // Within 1cm of target
-            System.out.println("Close enough, stopping");
+            //System.out.println("Close enough, stopping");
             return new Translation2d(0, 0);
         }
     
@@ -152,12 +151,6 @@ public class Swerve extends SubsystemBase {
         //System.out.println("Strafe Speed: " + strafeSpeed);
     
         return new Translation2d(0, strafeSpeed);
-    }
-    
-    
-    
-    public void toggleTransMode(){
-        transMode = !transMode;
     }
 
     public void leftRightAim(){
@@ -176,15 +169,12 @@ public class Swerve extends SubsystemBase {
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean rotAssist, boolean transAssist) {
-        //System.out.println(translation);
-        //System.out.printf("r: %.3f",rotAimAssist());
-        //System.out.printf("t: %s",transAimAssist());
 
         if (rotAssist) {
             rotation = rotAimAssist();
 
             //System.out.printf("r: %.3f",rotation);
-            //fieldRelative = false; // Disable field-relative while aiming
+            fieldRelative = false; // Disable field-relative while aiming
         }
 
         if (transAssist) {
@@ -193,11 +183,9 @@ public class Swerve extends SubsystemBase {
             //System.out.printf("t: %s",translation);
             // we could also do this:
             // translation = translation.plus(trans_aimAssist());
-            //fieldRelative = false; // Disable field-relative while aiming
+            fieldRelative = false; // Disable field-relative while aiming
         }
         
-        
-        if(transMode) rotation = 0;
         SwerveModuleState[] swerveModuleStates =
             Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(

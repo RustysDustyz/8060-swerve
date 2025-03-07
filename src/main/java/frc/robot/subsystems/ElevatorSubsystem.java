@@ -70,9 +70,6 @@ public class ElevatorSubsystem extends IOSubsystem {
         
         leftMotor.set(speed*MOTOR_SPEED);
         rightMotor.set(-speed*MOTOR_SPEED);
-        if (speed != 0) {
-            System.out.println(speed);
-        }
     }
 
 }

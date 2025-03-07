@@ -28,8 +28,6 @@ public class RobotContainer {
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
-    private final JoystickButton translationMode = new JoystickButton(driver, DriverBinds.translationToggleButton);
-
     private final JoystickButton rotAssist = new JoystickButton(driver, DriverBinds.rotationAimAssistButton);
     private final JoystickButton transAssist = new JoystickButton(driver, DriverBinds.translationAimAssistButton);
     
@@ -48,7 +46,7 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         // SmartDashboard Inputs
-        SmartDashboard.putString("autoCommand", "b1_toReef");
+        SmartDashboard.putString("autoCommand", "t_forward");
 
         /*
         SmartDashboard.putNumber("startX", 0.5);
@@ -154,9 +152,6 @@ public class RobotContainer {
             s_Elevator.resetDistance();
             s_Wrist.resetDistance();
         }));
-
-        // Translation Mode : Press Btn 1 to toggle
-        translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
     }
 
     private void applyAutoLogic(PathPlannerAuto auto, String commandName){
@@ -179,8 +174,8 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         SmartDashboard.updateValues();
-        String commandName = SmartDashboard.getString("autoCommand", "t_bezier");
-        System.out.println(commandName);
+        String commandName = SmartDashboard.getString("autoCommand", "t_forward");
+        //System.out.println(commandName);
         PathPlannerAuto auto = new PathPlannerAuto(commandName);
         applyAutoLogic(auto, commandName);
         return auto;
