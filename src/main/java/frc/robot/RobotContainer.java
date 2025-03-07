@@ -28,7 +28,7 @@ public class RobotContainer {
 
     /* Driver Buttons */
     // Buttons labelled by numbers on the LogiTech Extreme
-    private final JoystickButton translationMode = new JoystickButton(driver, DriverBinds.translationToggleButton);
+    //private final JoystickButton translationMode = new JoystickButton(driver, DriverBinds.translationToggleButton);
 
     private final JoystickButton rotAssist = new JoystickButton(driver, DriverBinds.rotationAimAssistButton);
     private final JoystickButton transAssist = new JoystickButton(driver, DriverBinds.translationAimAssistButton);
@@ -156,7 +156,7 @@ public class RobotContainer {
         }));
 
         // Translation Mode : Press Btn 1 to toggle
-        translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
+        //translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
     }
 
     private void applyAutoLogic(PathPlannerAuto auto, String commandName){
