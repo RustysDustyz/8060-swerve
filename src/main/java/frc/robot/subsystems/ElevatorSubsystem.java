@@ -14,17 +14,14 @@ public class ElevatorSubsystem extends IOSubsystem {
     // Heights in meters (adjust based on testing)
     private static final double[] HEIGHTS = {
       0.00,  // Ground level
-      0.120,  // First level
-      0.247,  // Second level
-      0.475,  // Third level
+      0.057,  // First level
+      0.189,  // Second level
+      0.418,  // Third level
       0.184,  // Fourth level
     };
 
     private static final double ERROR_MARGIN = 0.01; // 2 cm tolerance
     private static final double MOTOR_SPEED = 0.5; // Adjust based on testing
-    private static final double MAX_HEIGHT = 0.6;
-
-    private boolean settingHeight = false;
 
     public ElevatorSubsystem() {
         leftMotor = new SparkMax(ElevatorConstants.leftMotorID, MotorType.kBrushless);
@@ -69,24 +66,6 @@ public class ElevatorSubsystem extends IOSubsystem {
 
     @Override
     public void set(double speed) {
-        settingHeight = false;
-        double currentHeight = getHeight();
-        /* 
-        // Prevent moving up if at or below ground level
-        if (speed < 0 && currentHeight < 0) {
-            stop();
-            System.out.println("minned");
-            return;
-        }
-
-        // Prevent moving down if at or above max height
-        if (speed > 0 && currentHeight > MAX_HEIGHT) {
-            stop();
-            System.out.println("maxxed");
-            return;
-        }
-        */
-
         SmartDashboard.putNumber("elevator-height", getHeight());
         
         leftMotor.set(speed*MOTOR_SPEED);

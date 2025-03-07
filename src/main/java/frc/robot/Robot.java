@@ -13,7 +13,6 @@ import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;

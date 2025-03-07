@@ -2,17 +2,14 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.WristSubsystem;
 
 public class ElevatorSetpointCommand extends Command {
     private final ElevatorSubsystem elevator;
     private final int heightIndex;
-    private final int angleIndex;
 
-    public ElevatorSetpointCommand(ElevatorSubsystem elevator, int heightIndex, int angleIndex) {
+    public ElevatorSetpointCommand(ElevatorSubsystem elevator, int heightIndex) {
         this.elevator = elevator;
         this.heightIndex = heightIndex;
-        this.angleIndex = angleIndex;
         addRequirements(elevator);
     }
 
