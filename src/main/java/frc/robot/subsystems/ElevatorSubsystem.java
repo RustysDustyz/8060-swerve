@@ -57,6 +57,10 @@ public class ElevatorSubsystem extends IOSubsystem {
       return Math.abs(getHeight() - HEIGHTS[heightIndex]) < ERROR_MARGIN;
     }
 
+    public void resetDistance(){
+        encoder.reset();
+    }
+
     @Override
     public void stop() {
         leftMotor.set(0);
