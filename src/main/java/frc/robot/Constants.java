@@ -21,26 +21,25 @@ public final class Constants {
         // Axes
         public static final int translationAxis = XboxController.Axis.kLeftY.value;
         public static final int strafeAxis = XboxController.Axis.kLeftX.value;
-        public static final int rotationAxis = XboxController.Axis.kLeftTrigger.value;
+        public static final int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Swerve binds
-        public static final int translationToggleButton = 3;
-        public static final int robotCentricButton = 5;
-        public static final int zeroGyroButton = 6;
+        public static final int translationToggleButton = -1;
+        public static final int robotCentricButton = XboxController.Button.kLeftBumper.value;
+        public static final int zeroGyroButton = XboxController.Button.kStart.value;
 
         // Aim assist
-        public static final int rotationAimAssistButton = 1;
-        public static final int translationAimAssistButton = 4;
+        public static final int rotationAimAssistButton = XboxController.Button.kRightStick.value;
+        public static final int translationAimAssistButton = XboxController.Button.kLeftStick.value;
 
         // Elevator
-        public static final int intakeControlButton = 2;
+        public static final int intakeControlButton = XboxController.Button.kRightBumper.value;
         public static final int[] elevatorSetpointButtons = {
-            7,
-            8,
-            9,
-            10,
-            11,
-            12
+            XboxController.Button.kBack.value,
+            XboxController.Button.kA.value,
+            XboxController.Button.kX.value,
+            XboxController.Button.kB.value,
+            XboxController.Button.kY.value
         };
         
     }
