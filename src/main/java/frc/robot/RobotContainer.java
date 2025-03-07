@@ -131,7 +131,7 @@ public class RobotContainer {
         /* Elevator Setpoints */
         for(int i=0;i<ElevatorConstants.setpointCommandCount;i++){
             // Creates the command.
-            ElevatorSetpointCommand c = new ElevatorSetpointCommand(s_Elevator, s_Wrist, i, i);
+            ElevatorSetpointCommand c = new ElevatorSetpointCommand(s_Elevator, i, i);
 
             // Registers named commands "elevator<i>"
             NamedCommands.registerCommand(String.format("elevator%d",i), c);
@@ -179,6 +179,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         SmartDashboard.updateValues();
         String commandName = SmartDashboard.getString("autoCommand", "t_bezier");
+        System.out.println(commandName);
         PathPlannerAuto auto = new PathPlannerAuto(commandName);
         applyAutoLogic(auto, commandName);
         return auto;

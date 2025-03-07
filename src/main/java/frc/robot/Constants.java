@@ -108,11 +108,11 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 0.5; //TODO: This must be tuned to specific robot
-        public static final double maxAccel = 0.5;
+        public static final double maxSpeed = 0.75; //TODO: This must be tuned to specific robot
+        public static final double maxAccel = 1.5;
         /** Radians per Second */
         public static final double maxAngularVelocity = 1.0; //TODO: This must be tuned to specific robot
-        public static final double maxAngularAccel = 0.5;
+        public static final double maxAngularAccel = 2.5;
         /* Global angle offset */
         public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(0);
 
@@ -231,7 +231,7 @@ public final class Constants {
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = 0.2;
         // The speed at which the robot drives during autonomous mode in comparison to in
         // teleoperated mode.
-        public static final double speedFactor = 0.06;
+        public static final double speedFactor = 1;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;
