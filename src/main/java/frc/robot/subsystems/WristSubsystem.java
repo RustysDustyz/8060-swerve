@@ -11,7 +11,7 @@ public class WristSubsystem extends IOSubsystem {
     private final SparkMax intakeMotor;
     private final RelativeEncoder wristEncoder;
     // Wrist positions in motor rotations (adjust as needed)
-    private static final double[] ANGLES = {0, -692.13, -724.87, -724.87, 30.0}; // Example values in motor rotations
+    private static final double[] ANGLES = {0, -692.13, -724.87, -724.87, -514.30}; // Example values in motor rotations
 
     // Error margin (tolerance) in motor rotations
     private static final double ERROR_MARGIN = 0.5; // Adjust as needed
@@ -52,6 +52,10 @@ public class WristSubsystem extends IOSubsystem {
 
     public double getAngle() {
         return (wristEncoder.getPosition()* 360)/(Math.PI*2);
+    }
+
+    public void resetDistance(){
+        wristEncoder.setPosition(0);
     }
     
     @Override

@@ -35,7 +35,7 @@ public class RobotContainer {
     
     private final JoystickButton robotCentric = new JoystickButton(driver, DriverBinds.robotCentricButton);
     private final JoystickButton zeroGyro = new JoystickButton(driver, DriverBinds.zeroGyroButton);
-
+    private final JoystickButton intakeControl = new JoystickButton(driver, DriverBinds.intakeControlButton);
 
     /* Subsystems */
     private final LimelightConfig s_LimelightConfig = new LimelightConfig();
@@ -67,9 +67,9 @@ public class RobotContainer {
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
-                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.translationAxis), 
-                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.strafeAxis), 
-                () -> driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.rotationAxis), 
+                () -> intakeControl.getAsBoolean() ? 0 : driver.getRawAxis(DriverBinds.translationAxis), 
+                () -> intakeControl.getAsBoolean() ? 0 : driver.getRawAxis(DriverBinds.strafeAxis), 
+                () -> intakeControl.getAsBoolean() ? 0 : driver.getRawAxis(DriverBinds.rotationAxis), 
                 () -> robotCentric.getAsBoolean(),
                 () -> rotAssist.getAsBoolean(),
                 () -> transAssist.getAsBoolean()
@@ -80,7 +80,7 @@ public class RobotContainer {
             new WristCommand(
                 s_Wrist,
                 () -> {
-                    if(driver.getRawButton(DriverBinds.intakeControlButton)) return 0;
+                    if(intakeControl.getAsBoolean()) return 0;
                     switch(driver.getPOV()){
                     case 90:
                         return 1;
@@ -90,7 +90,7 @@ public class RobotContainer {
                         return 0;
                     }
                 },
-                () -> !driver.getRawButton(DriverBinds.intakeControlButton) ? 0 : driver.getRawAxis(DriverBinds.translationAxis)
+                () -> !intakeControl.getAsBoolean() ? 0 : driver.getRawAxis(DriverBinds.translationAxis)
             )
         );
 
@@ -141,13 +141,18 @@ public class RobotContainer {
                 ? -1
                 : DriverBinds.elevatorSetpointButtons[i]
             ;
-            if(driverSetpointButtonID == -1) new JoystickButton(driver, driverSetpointButtonID).onTrue(c);
+            if(driverSetpointButtonID != -1) new JoystickButton(driver, driverSetpointButtonID).onTrue(c);
         }
 
         /* Driver Buttons */
 
         // Zero Gyro : Press or hold Btn 6 to reset heading
-        zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+        zeroGyro.and(intakeControl.negate()).onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+        // Zero Elevator : Press or hold Btn 6 + 2 to reset heading
+        zeroGyro.and(intakeControl).onTrue(new InstantCommand(() -> {
+            s_Elevator.resetDistance();
+            s_Wrist.resetDistance();
+        }));
 
         // Translation Mode : Press Btn 1 to toggle
         translationMode.onTrue(new InstantCommand(() -> s_Swerve.toggleTransMode()));
