@@ -24,7 +24,6 @@ public final class Constants {
         public static final int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Swerve binds
-        //public static final int translationToggleButton = -1;
         public static final int robotCentricButton = XboxController.Button.kLeftBumper.value;
         public static final int zeroGyroButton = XboxController.Button.kStart.value;
 
