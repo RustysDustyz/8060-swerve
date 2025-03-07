@@ -17,7 +17,7 @@ public class ElevatorSubsystem extends IOSubsystem {
       0.120,  // First level
       0.247,  // Second level
       0.475,  // Third level
-      0.60,  // Fourth level
+      0.184,  // Fourth level
     };
 
     private static final double ERROR_MARGIN = 0.01; // 2 cm tolerance
