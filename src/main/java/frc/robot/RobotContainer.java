@@ -38,6 +38,7 @@ public class RobotContainer {
     private final JoystickButton intakeControl = new JoystickButton(driver, DriverBinds.intakeControlButton);
 
     /* Subsystems */
+    @SuppressWarnings("unused")
     private final LimelightConfig s_LimelightConfig = new LimelightConfig();
     private final Swerve s_Swerve = new Swerve();
     private final ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
@@ -131,7 +132,7 @@ public class RobotContainer {
         /* Elevator Setpoints */
         for(int i=0;i<ElevatorConstants.setpointCommandCount;i++){
             // Creates the command.
-            ElevatorSetpointCommand c = new ElevatorSetpointCommand(s_Elevator, i, i);
+            ElevatorSetpointCommand c = new ElevatorSetpointCommand(s_Elevator, i);
 
             // Registers named commands "elevator<i>"
             NamedCommands.registerCommand(String.format("elevator%d",i), c);
