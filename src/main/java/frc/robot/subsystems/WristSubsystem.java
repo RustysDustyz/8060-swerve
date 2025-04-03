@@ -14,6 +14,8 @@ public class WristSubsystem extends IOSubsystem {
     // Error margin (tolerance) in motor rotations
     private static final double ERROR_MARGIN = 0.5; // Adjust as needed
 
+    private boolean manualControlActive = false; // Flag for preventing periodic interference
+
     private double targetPosition = 0; // Stores the latest target position
 
     public WristSubsystem() {
