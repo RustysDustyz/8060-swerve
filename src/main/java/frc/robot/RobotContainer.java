@@ -154,30 +154,18 @@ public class RobotContainer {
         }));
     }
 
-    private void applyAutoLogic(PathPlannerAuto auto, String commandName){
-        /*
-        switch (commandName) {
-            case "reefElev1":
-                auto.andThen(new RunCommand(() -> {
-                    new PathPlannerAuto(driver.getRawButton(12) ? "reefLeft" : "reefRight").execute();
-                })).withTimeout(1.5)
-                .andThen(new PathPlannerAuto("reefElev2"));
-                break;
-        }
-        */
-    }
-
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        SmartDashboard.updateValues();
+        /*SmartDashboard.updateValues();
         String commandName = SmartDashboard.getString("autoCommand", "t_forward");
         //System.out.println(commandName);
+        */
+        String commandName = "t_forward";
         PathPlannerAuto auto = new PathPlannerAuto(commandName);
-        applyAutoLogic(auto, commandName);
         return auto;
     }
 }

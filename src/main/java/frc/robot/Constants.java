@@ -111,8 +111,8 @@ public final class Constants {
         public static final double maxSpeed = 0.75; //TODO: This must be tuned to specific robot
         public static final double maxAccel = 1.5;
         /** Radians per Second */
-        public static final double maxAngularVelocity = 1.0; //TODO: This must be tuned to specific robot
-        public static final double maxAngularAccel = 2.5;
+        public static final double maxAngularVelocity = 0.75; //TODO: This must be tuned to specific robot
+        public static final double maxAngularAccel = 1.5;
         /* Global angle offset */
         public static final Rotation2d globalModuleAngleOffset = Rotation2d.fromDegrees(0);
 

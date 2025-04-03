@@ -35,11 +35,11 @@ public class exampleAuto extends SequentialCommandGroup {
                 // Pass through the interior waypoints, making an 's' curve path
                 List.of(
                     //new Translation2d(0.2, 0.2), 
-                    new Translation2d(0.7, 0)
+                    new Translation2d(1.0, 0)
                 ), //(HARD CODED TRAJECTORY)
                 //waypoints,
                 // End 3 meters straight ahead of where we started, facing forward
-                new Pose2d(0.7,0, Rotation2d.fromDegrees(-180)), //(HARD CODED TRAJECTORY)
+                new Pose2d(1.0,0, Rotation2d.fromDegrees(0)), //(HARD CODED TRAJECTORY)
                 //end,
                 config);
 
@@ -59,7 +59,7 @@ public class exampleAuto extends SequentialCommandGroup {
                 s_Swerve::setModuleStates,
                 s_Swerve);
 
-
+// Paco was Here
         addCommands(
             new InstantCommand(() -> s_Swerve.setPose(exampleTrajectory.getInitialPose())),
             swerveControllerCommand

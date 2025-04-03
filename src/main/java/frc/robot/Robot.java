@@ -14,8 +14,15 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSink;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.PixelFormat;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -32,6 +39,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+  private DoublePublisher p_batteryVoltage;
+  private DoublePublisher p_matchTime;
   UsbCamera camera1;
   VideoSink server;
   
@@ -55,6 +64,9 @@ public class Robot extends TimedRobot {
       e.printStackTrace();
     }
     m_robotContainer = new RobotContainer();
+
+    p_batteryVoltage = NetworkTableInstance.getDefault().getDoubleTopic("/Voltage").publish();
+    p_matchTime = NetworkTableInstance.getDefault().getDoubleTopic("/Match Time").publish();
   }
 
   /**
@@ -71,7 +83,8 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
+    p_batteryVoltage.set(RobotController.getBatteryVoltage());
+    p_matchTime.set(Timer.getMatchTime());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
